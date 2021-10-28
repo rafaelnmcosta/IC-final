@@ -14,13 +14,26 @@ typedef struct cliente{
     char cpf[MAX_CPF];
     char cnpj[MAX_CNPJ];
     char telefone[MAX_TEL];
-    char endereço[MAX_END];
+    char endereco[MAX_END];
 } CLIENTE;
 
 void menu_principal();
 void menu_cliente();
 void menu_conta();
 
+void cadastra_cliente();
+void lista_cliente();
+void busca_cliente();
+void atualiza_cliente();
+void exclui_cliente();
+
+void lista_conta();
+void cadastra_conta_p_cliente();
+void lista_conta_p_cliente();
+void saca_conta();
+void deposita_conta();
+void transfere_conta();
+void extrato_conta();
 
 int main(){
 
@@ -36,11 +49,12 @@ void menu_principal(){
     while(1){
         printf("================= Bem Vindo! =================\n");
         printf("Digite um comando para prosseguir:\n");
-        printf("C - Gerenciar Clientes\nT - Gerenciar Contas\nS - Sair\n");
+        printf("C - Gerenciar Clientes\n");
+        printf("T - Gerenciar Contas\n");
+        printf("S - Sair\n");
         printf("\nEscolha: ");
 
         scanf("%c%*c", &opcao);
-
         switch(opcao){
             case'C':
                 menu_cliente();
@@ -70,22 +84,23 @@ void menu_cliente(){
     printf("E - Excluir um cliente cadastrado\n");
     printf("S - Sair\n");
     printf("\nEscolha: ");
+
     scanf("%c%*c", &opcao);
     switch (opcao){
         case 'C':
-            printf("Funcao de C\n");
+            cadastra_cliente();
         break;
         case 'L':
-            printf("Funcao de L\n");
+            lista_cliente();
         break;
         case 'B':
-            printf("Funcao de B\n");
+            busca_cliente();
         break;
         case 'A':
-            printf("Funcao de A\n");
+            atualiza_cliente();
         break;
         case 'E':
-            printf("Funcao de E\n");
+            exclui_cliente();
         break;
         case 'S':
             printf("Retornando ao menu\n");
@@ -111,6 +126,7 @@ void menu_conta(){
     printf("E - Exibir extrato de uma conta.\n");
     printf("S - Sair\n");
     printf("\nEscolha: ");
+
     scanf("%c%*c", &opcao);
     switch (opcao){
         case 'R':
