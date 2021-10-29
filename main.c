@@ -8,6 +8,10 @@
 #define MAX_TEL 15
 #define MAX_END 100
 
+#define MAX_CLIENTES 100
+#define MAX_CONTAS 200
+#define MAX_TRANSACOES 1000
+
 typedef struct cliente{
     int codigo;
     char nome[MAX_NOME];
@@ -16,6 +20,31 @@ typedef struct cliente{
     char telefone[MAX_TEL];
     char endereco[MAX_END];
 } CLIENTE;
+
+typedef struct conta{
+    int agencia;
+    int numero;
+    int cliente; //codigo do cliente;
+    float saldo;
+} CONTA;
+
+typedef struct transacao{
+    char tipo; // 'd'=debito 'c'=credito
+    float valor;
+    int data[3]; // formato data[0]=dia data[1]=mes data[2]=ano;
+    int conta; // agencia + codigo
+} TRANSACAO;
+
+/*------------- Vetores globais que armazenam os dados ----------*/
+    //CLIENTE * clientes;
+    //CONTA * contas;
+    //TRANSACAO * transacoes;
+    CLIENTE clientes[MAX_CLIENTES];
+    CONTA contas[MAX_CONTAS];
+    TRANSACAO transacoes[MAX_TRANSACOES];
+/*---------------------------------------------------------------*/
+
+void boot(CLIENTE*, CONTA*, TRANSACAO*);
 
 void menu_principal();
 void menu_cliente();
@@ -35,11 +64,62 @@ void deposita_conta();
 void transfere_conta();
 void extrato_conta();
 
+
 int main(){
+
+    boot(clientes, contas, transacoes);
 
     menu_principal();
 
     return 0;
+}
+
+void boot(CLIENTE* clientes, CONTA* contas, TRANSACAO* transacoes){
+
+    clientes = (CLIENTE *) calloc(MAX_CLIENTES, sizeof(CLIENTE));
+    contas = (CONTA *) calloc(MAX_CONTAS, sizeof(CONTA));
+    transacoes = (TRANSACAO *) calloc(MAX_TRANSACOES, sizeof(TRANSACAO));
+
+    CLIENTE cli_atual;
+    CONTA ct_atual;
+    TRANSACAO tr_atual;
+
+    FILE * cli_db; //Base de dados de clientes
+    FILE * ct_db; //Base de dados de contas
+    FILE * tr_db; //Base de dados de transacoes
+
+    char opcao;
+    int i;
+
+    cli_db = fopen("dados_clientes.txt", "r");
+    if(cli_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
+    else{
+        i=0;
+        while(fscanf(cli_db, "%d %s %s %s %s %s", &cli_atual.codigo, &cli_atual.nome, &cli_atual.cpf, &cli_atual.cnpj, &cli_atual.telefone, &cli_atual.endereco)!=EOF){
+            clientes[i]=cli_atual;
+            i++;
+        }
+    }
+
+    ct_db = fopen("dados_contas.txt", "r");
+    if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CONTAS *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
+    else{
+        i=0;
+        while(fscanf(ct_db, "%d %d %d %f", &ct_atual.agencia, &ct_atual.numero, &ct_atual.cliente, &ct_atual.saldo)!=EOF){
+            contas[i]=ct_atual;
+            i++;
+        }
+    }
+
+    tr_db = fopen("dados_transacoes.txt", "r");
+    if(tr_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE TRANSACOES *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
+    else{
+        i=0;
+        while(fscanf(tr_db, "%c %f %d/%d/%d %d", &tr_atual.tipo, &tr_atual.valor, &tr_atual.data[0], &tr_atual.data[1], &tr_atual.data[2], &tr_atual.conta)!=EOF){
+            transacoes[i]=tr_atual;
+            i++;
+        }
+    }
 }
 
 void menu_principal(){
@@ -47,7 +127,7 @@ void menu_principal(){
     char opcao;
 
     while(1){
-        printf("================= Bem Vindo! =================\n");
+        printf("================== Bem Vindo! ==================\n");
         printf("Digite um comando para prosseguir:\n");
         printf("C - Gerenciar Clientes\n");
         printf("T - Gerenciar Contas\n");
@@ -73,6 +153,7 @@ void menu_principal(){
 }
 
 void menu_cliente(){
+
     char opcao;
 
     printf("=============== Gerenciar Clientes ===============\n");
@@ -88,19 +169,19 @@ void menu_cliente(){
     scanf("%c%*c", &opcao);
     switch (opcao){
         case 'C':
-            cadastra_cliente();
+            //cadastra_cliente();
         break;
         case 'L':
-            lista_cliente();
+            //lista_cliente();
         break;
         case 'B':
-            busca_cliente();
+            //busca_cliente();
         break;
         case 'A':
-            atualiza_cliente();
+            //atualiza_cliente();
         break;
         case 'E':
-            exclui_cliente();
+            //exclui_cliente();
         break;
         case 'S':
             printf("Retornando ao menu\n");
@@ -108,6 +189,7 @@ void menu_cliente(){
         break;
         default:
             printf("*!* Comando invalido! *!*\n");
+            menu_cliente();
         break;
     }
 }
@@ -130,25 +212,25 @@ void menu_conta(){
     scanf("%c%*c", &opcao);
     switch (opcao){
         case 'R':
-            printf("Funcao de R\n");
+            //lista_conta();
         break;
         case 'C':
-            printf("Funcao de C\n");
+            //cadastra_conta_p_cliente();
         break;
         case 'L':
-            printf("Funcao de L\n");
+            //lista_conta_p_cliente();
         break;
         case 'W':
-            printf("Funcao de W\n");
+            //saca_conta();
         break;
         case 'D':
-            printf("Funcao de D\n");
+            //deposita_conta();
         break;
         case 'T':
-            printf("Funcao de T\n");
+            //transfere_conta();
         break;
         case 'E':
-            printf("Funcao de E\n");
+            //extrato_conta();
         break;
         case 'S':
             printf("Retornando ao menu\n");
@@ -156,6 +238,7 @@ void menu_conta(){
         break;
         default:
             printf("*!* Comando invalido! *!*\n");
+            menu_conta();
         break;
     }
 }
