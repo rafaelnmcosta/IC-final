@@ -1,0 +1,19 @@
+#Serão ignorados os arquivos:
+# 
+# compilados
+# compactados
+# de teste
+# pasta do vscode
+# de input e output
+
+
+/.vscode
+
+input
+output
+
+*.exe
+*.out
+*.rar
+*.zip
+teste.c
