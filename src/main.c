@@ -396,3 +396,22 @@ void cadastra_cliente(CLIENTE* v_clientes){
     }
 
 }
+
+void lista_cliente(CLIENTE * v_clientes){
+
+    int i;
+    if(v_clientes[0].codigo[0]==0){
+        printf("\n*!* Nenhum cliente cadastrado! *!*\n");
+    }
+    else{
+        printf("\n====== Lista de clientes ======\n");    
+        for(i=0; i<MAX_CLIENTES; i++){
+            printf("\nCodigo: %s", v_clientes[i].codigo);
+            printf("\nNome: %s", v_clientes[i].nome);
+            printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+            printf("\nTelefone: %s", v_clientes[i].telefone);
+            printf("\nEndereco: %s\n", v_clientes[i].endereco);
+        }
+    }
+
+}
