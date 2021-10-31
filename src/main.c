@@ -40,9 +40,9 @@ typedef struct transacao{
     CLIENTE * v_clientes;
     CONTA * v_contas;
     TRANSACAO * v_transacoes;
-    int num_clientes; //numero de clientes cadastrados atualmente
-    int num_contas; //numero de contas cadastrados atualmente
-    int num_transacoes; //numero de transacoes cadastrados atualmente
+    int num_clientes=0; //numero de clientes cadastrados atualmente
+    int num_contas=0; //numero de contas cadastrados atualmente
+    int num_transacoes=0; //numero de transacoes cadastrados atualmente
     FILE * cli_db; //Base de dados de clientes
     FILE * ct_db; //Base de dados de contas
     FILE * tr_db; //Base de dados de transacoes
@@ -61,7 +61,7 @@ void organiza_vetor(int);
 
 void cadastra_cliente();
 void lista_cliente();
-void busca_cliente(char*, int);
+void busca_cliente();
 void atualiza_cliente();
 void exclui_cliente();
 
@@ -99,8 +99,9 @@ void boot(){
     if(cli_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
         i=0;
-        while(fscanf(cli_db, "%s %[^\n] %s %s %[^\n]", &cli_atual.codigo, &cli_atual.nome, &cli_atual.cpf_cnpj, &cli_atual.telefone, &cli_atual.endereco)!=EOF){
+        while(fscanf(cli_db, "%s %[^\n] %[^\n] %[^\n] %[^\n]", &cli_atual.codigo, &cli_atual.nome, &cli_atual.cpf_cnpj, &cli_atual.telefone, &cli_atual.endereco)!=EOF){
             v_clientes[i]=cli_atual;
+            num_clientes++;
             i++;
         }
     }
@@ -112,6 +113,7 @@ void boot(){
         i=0;
         while(fscanf(ct_db, "%s %s %f", &ct_atual.agencia_e_nro, &ct_atual.cliente, &ct_atual.saldo)!=EOF){
             v_contas[i]=ct_atual;
+            num_contas++;
             i++;
         }
     }
@@ -123,6 +125,7 @@ void boot(){
         i=0;
         while(fscanf(tr_db, "%c %f %s %s", &tr_atual.tipo, &tr_atual.valor, &tr_atual.data, &tr_atual.conta)!=EOF){
             v_transacoes[i]=tr_atual;
+            num_transacoes++;
             i++;
         }
     }
@@ -172,8 +175,8 @@ void menu_cliente(){
     printf("=============== Gerenciar Clientes ===============\n");
     printf("Digite um comando para prosseguir:\n");
     printf("C - Cadastrar um cliente\n");
-    printf("L - Listar todos os v_clientes cadastrados\n");
-    printf("B - Buscar cliente já cadastrado\n");
+    printf("L - Listar todos os clientes cadastrados\n");
+    printf("B - Buscar cliente ja cadastrado\n");
     printf("A - Atualizar um cliente cadastrado\n");
     printf("E - Excluir um cliente cadastrado\n");
     printf("S - Sair\n");
@@ -188,7 +191,7 @@ void menu_cliente(){
             lista_cliente();
         break;
         case 'B':
-            //busca_cliente();
+            busca_cliente();
         break;
         case 'A':
             //atualiza_cliente();
@@ -212,12 +215,12 @@ void menu_conta(){
 
     printf("================ Gerenciar Contas ================\n");
     printf("Digite um comando para prosseguir:\n");
-    printf("R - Listagem de todas as v_contas cadastradas.\n");
+    printf("R - Listagem de todas as contas cadastradas.\n");
     printf("C - Cadastrar uma conta para um cliente.\n");
-    printf("L - Listar todas as v_contas de um cliente.\n");
+    printf("L - Listar todas as contas de um cliente.\n");
     printf("W - Realizar um saque em uma conta.\n");
     printf("D - Realizar um depósito em uma conta.\n");
-    printf("T - Realizar transferência entre v_contas.\n");
+    printf("T - Realizar transferencia entre contas.\n");
     printf("E - Exibir extrato de uma conta.\n");
     printf("S - Sair\n");
     printf("\nEscolha: ");
@@ -406,55 +409,77 @@ void cadastra_cliente(){
 
     CLIENTE novo_cli;
     char opcao;
-    int i;
+    int i, check;
 
     while(1){
+        check=1;
         printf("\n================ Cadastro de clientes ================\n");
         printf("\nInforme o codigo do novo cliente: ");
         scanf("%s%*c", &novo_cli.codigo);
         printf("\nInforme o nome do novo cliente: ");
-        scanf("%s%*c", &novo_cli.nome);
+        scanf("%[^\n]", &novo_cli.nome);
         printf("\nInforme o cpf/cnpj do novo cliente: ");
         scanf("%s%*c", &novo_cli.cpf_cnpj);
         printf("\nInforme o telefone do novo cliente: ");
         scanf("%s%*c", &novo_cli.telefone);
         printf("\nInforme o endereco do novo cliente: ");
-        scanf("%s%*c", &novo_cli.endereco);
+        scanf("%[^\n]%*c", &novo_cli.endereco);
 
-        printf("\nPor favor, confirme se as informacoes estao corretas:\n\n");
-        printf("Codigo: %s\n", novo_cli.codigo);
-        printf("Nome: %s\n", novo_cli.nome);
-        printf("CPF/CNPJ: %s\n", novo_cli.cpf_cnpj);
-        printf("Telefone: %s\n", novo_cli.telefone);
-        printf("Endereco: %s\n", novo_cli.endereco);
-        printf("\nDeseja salvar o cliente assim? (s/n): ");
-        scanf("%c%*c", &opcao);
-        
-        /*
-        if(opcao=='s' || opcao=='S'){
-            for(i=0; i<MAX_CLIENTES; i++){
-                if(compara_valor(v_clientes, NULL, NULL, 1, novo_cli.codigo, 1)){
-                    printf("\n\n*!* Ja existe um cliente cadastrado com este codigo! *!*\n");
-                    break;
+        for(i=0; i<num_clientes; i++){
+            if(compara_valor(1, novo_cli.codigo, 1)){
+                printf("\n\n*!* Ja existe um cliente cadastrado com este codigo! *!*\n");
+                check=0;
+                break;
+            }
+            else if(compara_valor(1, novo_cli.cpf_cnpj, 2)){
+                printf("\n\n*!* Ja existe um cliente cadastrado com este CPF/CNPJ! *!*\n");
+                check=0;
+                break;
+            }
+        }
+
+        while(check){
+            printf("\nPor favor, confirme se as informacoes estao corretas:\n\n");
+            printf("Codigo: %s\n", novo_cli.codigo);
+            printf("Nome: %s\n", novo_cli.nome);
+            printf("CPF/CNPJ: %s\n", novo_cli.cpf_cnpj);
+            printf("Telefone: %s\n", novo_cli.telefone);
+            printf("Endereco: %s\n", novo_cli.endereco);
+            printf("==============================================");
+            printf("\nDeseja salvar o cliente assim? (s/n): ");
+            scanf("%c%*c", &opcao);
+            
+            if(opcao=='s' || opcao=='S'){
+                v_clientes[num_clientes] = novo_cli;
+                if(strcmp(v_clientes[num_clientes].codigo, novo_cli.codigo)!=0){
+                    printf("\n*!* Erro ao cadastrar cliente! *!*\n");
                 }
-                else if(compara_valor(v_clientes, NULL, NULL, 1, novo_cli.cpf_cnpj, 2)){
-                    printf("\n\n*!* Ja existe um cliente cadastrado com este CPF/CNPJ! *!*\n");
+                else{
+                    printf("\n------ Cliente cadastrado com sucesso!---------\n");
+                    printf("\nRetornando ao menu principal\n");
+                    num_clientes++;
+                    return;
+                }
+            }
+            else if(opcao=='n' || opcao=='N'){
+                printf("\nDeseja inserir novamente os dados? (s/n): ");
+                scanf("%c%*c", &opcao);
+
+                if(opcao=='n' || opcao=='N'){
+                    printf("\nRetornando ao menu principal\n");
+                    return;
+                }
+                else if(opcao=='s' || opcao=='S'){
                     break;
                 }
                 else{
-                    v_clientes[num_clientes] = novo_cli;
-                    if(strcmp(v_clientes[num_clientes].codigo, novo_cli.codigo)!=0){
-                        printf("\n*!* Erro ao cadastrar cliente! *!*\n");
-                    }
-                    else{
-                        printf("\n------ Cliente cadastrado com sucesso!---------\n");
-                        num_clientes++;
-                        return;
-                    }
+                    printf("\n*!* Comando invalido! *!*\n");
                 }
             }
+            else{
+                printf("\n*!* Comando invalido! *!*\n");
+            }
         }
-        */
     }
 }
 
@@ -474,6 +499,30 @@ void lista_cliente(){
                 printf("\nTelefone: %s", v_clientes[i].telefone);
                 printf("\nEndereco: %s\n", v_clientes[i].endereco);
             }
+        }
+    }
+}
+
+void busca_cliente(){
+
+    int i, opcao;
+
+    while(1){
+        printf("\n============= Lista de clientes ==================\n");
+        printf("Informe o metodo que deseja usar para buscar o cliente:\n");
+        printf("1 para buscar por nome;\n2 para buscar por codigo;\n3 para buscar por CPF/CNPJ;\n");
+        printf("\nEscolha: ");
+        scanf("%d", &opcao);
+
+        switch(opcao){
+            case 1:
+            break;
+            case 2:
+            break;
+            case 3:
+            break;
+            default:
+            break;
         }
     }
 }
