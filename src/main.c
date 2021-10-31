@@ -13,6 +13,7 @@
 #define MAX_CLIENTES 100
 #define MAX_CONTAS 200
 #define MAX_TRANSACOES 1000
+#define MAX_DATA 12
 
 typedef struct cliente{
     char codigo[MAX_CODIGO];
@@ -31,36 +32,38 @@ typedef struct conta{
 typedef struct transacao{
     char tipo; // 'd'=debito 'c'=credito
     float valor;
-    char data[12]; // formato data[0]=dia data[1]=mes data[2]=ano;
+    char data[MAX_DATA]; // formato data[0]=dia data[1]=mes data[2]=ano;
     char conta[MAX_AGENCIA_E_NRO]; // agencia + codigo
 } TRANSACAO;
 
 /*------------- Variaveis globais que armazenam os dados ----------*/
-    //CLIENTE v_clientes[MAX_CLIENTES];
-    //CONTA v_contas[MAX_CONTAS];
-    //TRANSACAO v_transacoes[MAX_TRANSACOES];
+    CLIENTE v_clientes[MAX_CLIENTES];
+    CONTA v_contas[MAX_CONTAS];
+    TRANSACAO v_transacoes[MAX_TRANSACOES];
     int num_clientes; //numero de clientes cadastrados atualmente
     int num_contas; //numero de contas cadastrados atualmente
     int num_transacoes; //numero de transacoes cadastrados atualmente
-    //FILE * cli_db; //Base de dados de clientes
-    //FILE * ct_db; //Base de dados de contas
-    //FILE * tr_db; //Base de dados de transacoes
+    FILE * cli_db; //Base de dados de clientes
+    FILE * ct_db; //Base de dados de contas
+    FILE * tr_db; //Base de dados de transacoes
 /*----------------------------------------------------------------*/
 
-//void boot(CLIENTE*, CONTA*, TRANSACAO*, FILE*, FILE*, FILE*);
+void boot(CLIENTE*, CONTA*, TRANSACAO*, FILE*, FILE*, FILE*);
 //void quit(CLIENTE*, CONTA*, TRANSACAO*, FILE*, FILE*, FILE*);
 
-void menu_principal(CLIENTE*, CONTA*, TRANSACAO*);
-void menu_cliente(CLIENTE*);
-void menu_conta(CLIENTE*, CONTA*, TRANSACAO*);
+void menu_principal();
+void menu_cliente();
+void menu_conta();
 
 int compara_valor(CLIENTE*, CONTA*, TRANSACAO*, int, char*, int);
+int ordem_alfabetica(char*, char*);
+void organiza_vetor(CLIENTE*, CONTA*, TRANSACAO*, int);
 
-void cadastra_cliente(CLIENTE*);
-void lista_cliente(CLIENTE*);
-void busca_cliente(CLIENTE*);
-void atualiza_cliente(CLIENTE*);
-void exclui_cliente(CLIENTE*);
+void cadastra_cliente();
+void lista_cliente();
+void busca_cliente(char*, int);
+void atualiza_cliente();
+void exclui_cliente();
 
 void lista_conta();
 void cadastra_conta_p_cliente();
@@ -72,22 +75,19 @@ void extrato_conta();
 
 
 int main(){
-
-    //boot(v_clientes, v_contas, v_transacoes, cli_db, ct_db, tr_db);
-
+    /*
     CLIENTE * v_clientes;
     CONTA * v_contas;
     TRANSACAO * v_transacoes;
+    */
 
-    v_clientes = (CLIENTE *) calloc(MAX_CLIENTES, sizeof(CLIENTE));
-    v_contas = (CONTA *) calloc(MAX_CONTAS, sizeof(CONTA));
-    v_transacoes = (TRANSACAO *) calloc(MAX_TRANSACOES, sizeof(TRANSACAO));
+    boot(v_clientes, v_contas, v_transacoes, cli_db, ct_db, tr_db);
 
     menu_principal(v_clientes, v_contas, v_transacoes);
 
     return 0;
 }
-/*
+
 void boot(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* cli_db, FILE* ct_db, FILE* tr_db){
 
     v_clientes = (CLIENTE *) calloc(MAX_CLIENTES, sizeof(CLIENTE));
@@ -115,7 +115,7 @@ void boot(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* c
     if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CONTAS *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
         i=0;
-        while(fscanf(ct_db, "%d %d %d %f", &ct_atual.agencia, &ct_atual.numero, &ct_atual.cliente, &ct_atual.saldo)!=EOF){
+        while(fscanf(ct_db, "%d %d %d %f", &ct_atual.agencia_e_nro, &ct_atual.cliente, &ct_atual.saldo)!=EOF){
             v_contas[i]=ct_atual;
             i++;
         }
@@ -132,21 +132,20 @@ void boot(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* c
         }
     }
     fclose(tr_db);
-
-
 }
 
-void exit(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* cli_db, FILE* ct_db, FILE* tr_db){
+/*
+void quit(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* cli_db, FILE* ct_db, FILE* tr_db){
 
 }
 */
 
-void menu_principal(CLIENTE * v_clientes, CONTA * v_contas, TRANSACAO * v_transacoes){
+void menu_principal(){
 
     char opcao;
 
     while(1){
-        printf("================== Bem Vindo! ==================\n");
+        printf("\n================== Bem Vindo! ==================\n");
         printf("Digite um comando para prosseguir:\n");
         printf("C - Gerenciar Clientes\n");
         printf("T - Gerenciar Contas\n");
@@ -171,7 +170,7 @@ void menu_principal(CLIENTE * v_clientes, CONTA * v_contas, TRANSACAO * v_transa
     }
 }
 
-void menu_cliente(CLIENTE * v_clientes){
+void menu_cliente(){
 
     char opcao;
 
@@ -188,10 +187,10 @@ void menu_cliente(CLIENTE * v_clientes){
     scanf("%c%*c", &opcao);
     switch (opcao){
         case 'C':
-            cadastra_cliente(v_clientes);
+            cadastra_cliente();
         break;
         case 'L':
-            lista_cliente(v_clientes);
+            lista_cliente();
         break;
         case 'B':
             //busca_cliente();
@@ -282,6 +281,7 @@ int compara_valor(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes,
         clientes:
             1=codigo;
             2=cpf/cnpj;
+            3=nome;
         contas:
             1=agencia+conta
             2=codigo de cliente
@@ -310,6 +310,14 @@ int compara_valor(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes,
                     }
                     return 0;
                 break;
+                case 3:
+                    for(i=0; i<MAX_CLIENTES; i++){
+                        if(strcmp(v_clientes[i].nome, busca)==0){
+                            return 1;
+                        }
+                    }
+                    return 0;
+                break;  
             }
         break;
         case 2:
@@ -334,15 +342,71 @@ int compara_valor(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes,
         break;
         case 3:
             if(categoria==1){
-                /*@TODO
-                    -----------------------------------implementar busca por data;--------------------------------
-                */
+                for(i=0; i<MAX_TRANSACOES; i++){
+                    if(strcmp(v_transacoes[i].data, busca)==0){
+                        return 1;
+                    }
+                }
             }
+            return 0;
         break;
     }
 }
 
-void cadastra_cliente(CLIENTE* v_clientes){
+/*
+int ordem_alfabetica(char * comp_1, char * comp_2){
+
+}
+*/
+
+/*
+void organiza_vetor(CLIENTE * v_clientes, CONTA * v_contas, TRANSACAO * v_transacoes, int tipo){
+    //
+        Tipos de vetores a organizar:
+        clientes=1  : organiza o vetor de clientes por ordem alfabetica;
+        contas=2    : organiza o vetor de contas de acordo com a ordem alfabetica de clientes;
+        transacoes=3: organiza o vetor de transacoes de acordo com a data;
+    //
+    CLIENTE * clientes_aux;
+    CONTA * contas_aux;
+    TRANSACAO * transacoes_aux;
+
+    CLIENTE * clientes_ord;
+    CONTA * contas_ord;
+    TRANSACAO * transacoes_ord;
+
+    int i, j;
+
+    clientes_aux = (CLIENTE *) calloc(MAX_CLIENTES, sizeof(CLIENTE));
+    contas_aux = (CONTA *) calloc(MAX_CONTAS, sizeof(CONTA));
+    transacoes_aux = (TRANSACAO *) calloc(MAX_TRANSACOES, sizeof(TRANSACAO));
+
+    clientes_ord = (CLIENTE *) calloc(MAX_CLIENTES, sizeof(CLIENTE));
+    contas_ord = (CONTA *) calloc(MAX_CONTAS, sizeof(CONTA));
+    transacoes_ord = (TRANSACAO *) calloc(MAX_TRANSACOES, sizeof(TRANSACAO));
+
+    switch(tipo){
+        case 1:
+            clientes_aux = v_clientes;
+            for(i=0; i<MAX_CLIENTES; i++){
+                for(j=0; j<MAX_CLIENTES; j++){
+                    if(ordem_alfabetica(clientes_aux[i], clientes_aux[j])){
+
+                    }
+                }
+            }
+        break;
+        case 2:
+
+        break;
+        case 3:
+
+        break;
+    }
+}
+*/
+
+void cadastra_cliente(){
 
     CLIENTE novo_cli;
     char opcao;
@@ -394,24 +458,32 @@ void cadastra_cliente(CLIENTE* v_clientes){
             }
         }
     }
-
 }
 
-void lista_cliente(CLIENTE * v_clientes){
+void lista_cliente(){
 
     int i;
     if(v_clientes[0].codigo[0]==0){
         printf("\n*!* Nenhum cliente cadastrado! *!*\n");
     }
     else{
-        printf("\n====== Lista de clientes ======\n");    
+        printf("\n============= Lista de clientes ==================\n");    
         for(i=0; i<MAX_CLIENTES; i++){
-            printf("\nCodigo: %s", v_clientes[i].codigo);
-            printf("\nNome: %s", v_clientes[i].nome);
-            printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
-            printf("\nTelefone: %s", v_clientes[i].telefone);
-            printf("\nEndereco: %s\n", v_clientes[i].endereco);
+            if(v_clientes[i].codigo[0]!=0){
+                printf("\nCodigo: %s", v_clientes[i].codigo);
+                printf("\nNome: %s", v_clientes[i].nome);
+                printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+                printf("\nTelefone: %s", v_clientes[i].telefone);
+                printf("\nEndereco: %s\n", v_clientes[i].endereco);
+            }
         }
     }
-
 }
+
+/*
+void busca_cliente(CLIENTE * v_clientes, char * busca, int categoria){
+    if(compara_valor(v_clientes, NULL, NULL, 1, busca, categoria){
+
+    }
+}
+*/
