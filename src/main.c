@@ -37,9 +37,9 @@ typedef struct transacao{
 } TRANSACAO;
 
 /*------------- Variaveis globais que armazenam os dados ----------*/
-    CLIENTE v_clientes[MAX_CLIENTES];
-    CONTA v_contas[MAX_CONTAS];
-    TRANSACAO v_transacoes[MAX_TRANSACOES];
+    CLIENTE * v_clientes;
+    CONTA * v_contas;
+    TRANSACAO * v_transacoes;
     int num_clientes; //numero de clientes cadastrados atualmente
     int num_contas; //numero de contas cadastrados atualmente
     int num_transacoes; //numero de transacoes cadastrados atualmente
@@ -48,16 +48,16 @@ typedef struct transacao{
     FILE * tr_db; //Base de dados de transacoes
 /*----------------------------------------------------------------*/
 
-void boot(CLIENTE*, CONTA*, TRANSACAO*, FILE*, FILE*, FILE*);
+void boot();
 //void quit(CLIENTE*, CONTA*, TRANSACAO*, FILE*, FILE*, FILE*);
 
 void menu_principal();
 void menu_cliente();
 void menu_conta();
 
-int compara_valor(CLIENTE*, CONTA*, TRANSACAO*, int, char*, int);
+int compara_valor(int, char*, int);
 int ordem_alfabetica(char*, char*);
-void organiza_vetor(CLIENTE*, CONTA*, TRANSACAO*, int);
+void organiza_vetor(int);
 
 void cadastra_cliente();
 void lista_cliente();
@@ -75,20 +75,15 @@ void extrato_conta();
 
 
 int main(){
-    /*
-    CLIENTE * v_clientes;
-    CONTA * v_contas;
-    TRANSACAO * v_transacoes;
-    */
 
-    boot(v_clientes, v_contas, v_transacoes, cli_db, ct_db, tr_db);
+    boot();
 
-    menu_principal(v_clientes, v_contas, v_transacoes);
+    menu_principal();
 
     return 0;
 }
 
-void boot(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* cli_db, FILE* ct_db, FILE* tr_db){
+void boot(){
 
     v_clientes = (CLIENTE *) calloc(MAX_CLIENTES, sizeof(CLIENTE));
     v_contas = (CONTA *) calloc(MAX_CONTAS, sizeof(CONTA));
@@ -104,7 +99,7 @@ void boot(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* c
     if(cli_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
         i=0;
-        while(fscanf(cli_db, "%d %s %s %s %s", &cli_atual.codigo, &cli_atual.nome, &cli_atual.cpf_cnpj, &cli_atual.telefone, &cli_atual.endereco)!=EOF){
+        while(fscanf(cli_db, "%s %[^\n] %s %s %[^\n]", &cli_atual.codigo, &cli_atual.nome, &cli_atual.cpf_cnpj, &cli_atual.telefone, &cli_atual.endereco)!=EOF){
             v_clientes[i]=cli_atual;
             i++;
         }
@@ -115,7 +110,7 @@ void boot(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* c
     if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CONTAS *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
         i=0;
-        while(fscanf(ct_db, "%d %d %d %f", &ct_atual.agencia_e_nro, &ct_atual.cliente, &ct_atual.saldo)!=EOF){
+        while(fscanf(ct_db, "%s %s %f", &ct_atual.agencia_e_nro, &ct_atual.cliente, &ct_atual.saldo)!=EOF){
             v_contas[i]=ct_atual;
             i++;
         }
@@ -126,7 +121,7 @@ void boot(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* c
     if(tr_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE TRANSACOES *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
         i=0;
-        while(fscanf(tr_db, "%c %f %s %d", &tr_atual.tipo, &tr_atual.valor, &tr_atual.data, &tr_atual.conta)!=EOF){
+        while(fscanf(tr_db, "%c %f %s %s", &tr_atual.tipo, &tr_atual.valor, &tr_atual.data, &tr_atual.conta)!=EOF){
             v_transacoes[i]=tr_atual;
             i++;
         }
@@ -155,10 +150,10 @@ void menu_principal(){
         scanf("%c%*c", &opcao);
         switch(opcao){
             case'C':
-                menu_cliente(v_clientes);
+                menu_cliente();
             break;
             case'T':
-                menu_conta(v_clientes, v_contas, v_transacoes);
+                menu_conta();
             break;
             case'S':
                 return;
@@ -207,12 +202,12 @@ void menu_cliente(){
         break;
         default:
             printf("*!* Comando invalido! *!*\n");
-            menu_cliente(v_clientes);
+            menu_cliente();
         break;
     }
 }
 
-void menu_conta(CLIENTE * v_clientes, CONTA * v_contas, TRANSACAO * v_transacoes){
+void menu_conta(){
     char opcao;
 
     printf("================ Gerenciar Contas ================\n");
@@ -256,7 +251,7 @@ void menu_conta(CLIENTE * v_clientes, CONTA * v_contas, TRANSACAO * v_transacoes
         break;
         default:
             printf("*!* Comando invalido! *!*\n");
-            menu_conta(v_clientes, v_contas, v_transacoes);
+            menu_conta();
         break;
     }
 }
@@ -273,20 +268,21 @@ void menu_conta(CLIENTE * v_clientes, CONTA * v_contas, TRANSACAO * v_transacoes
  * @param categoria o campo a ser comparado durante a busca;
  * @return codigo referente ao resultado da busca: 1=encontrado 0=nao encontrado
  */
-int compara_valor(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, int tipo, char* busca, int categoria){
+int compara_valor(int tipo, char* busca, int categoria){
     /*
-    Tipos: 1=clientes; 2=contas; 3=transacoes;
-
-    Categorias:
-        clientes:
-            1=codigo;
-            2=cpf/cnpj;
-            3=nome;
-        contas:
-            1=agencia+conta
-            2=codigo de cliente
-        transacoes:
-            1=data;
+    *    Tipos: 1=clientes; 2=contas; 3=transacoes;
+    *
+    *    Categorias:
+    *        clientes:
+    *            1=codigo;
+    *            2=cpf/cnpj;
+    *            3=nome;
+    *        contas:
+    *            1=agencia+conta
+    *            2=codigo de cliente
+    *        transacoes:
+    *            1=data;
+    * 
     */
     
     int i;
@@ -360,7 +356,7 @@ int ordem_alfabetica(char * comp_1, char * comp_2){
 */
 
 /*
-void organiza_vetor(CLIENTE * v_clientes, CONTA * v_contas, TRANSACAO * v_transacoes, int tipo){
+void organiza_vetor(int tipo){
     //
         Tipos de vetores a organizar:
         clientes=1  : organiza o vetor de clientes por ordem alfabetica;
@@ -433,7 +429,8 @@ void cadastra_cliente(){
         printf("Endereco: %s\n", novo_cli.endereco);
         printf("\nDeseja salvar o cliente assim? (s/n): ");
         scanf("%c%*c", &opcao);
-
+        
+        /*
         if(opcao=='s' || opcao=='S'){
             for(i=0; i<MAX_CLIENTES; i++){
                 if(compara_valor(v_clientes, NULL, NULL, 1, novo_cli.codigo, 1)){
@@ -457,6 +454,7 @@ void cadastra_cliente(){
                 }
             }
         }
+        */
     }
 }
 
@@ -479,11 +477,3 @@ void lista_cliente(){
         }
     }
 }
-
-/*
-void busca_cliente(CLIENTE * v_clientes, char * busca, int categoria){
-    if(compara_valor(v_clientes, NULL, NULL, 1, busca, categoria){
-
-    }
-}
-*/

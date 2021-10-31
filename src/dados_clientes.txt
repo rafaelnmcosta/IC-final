@@ -1,13 +1,16 @@
+codigo
+nome
+cpf_cnpj
+telefone
+endereco
 1
 cliente1
 123456789
-000000000
 40028922
 rua dos bobos numero 0
 2
 cliente2
 987654321
-0101010101
 99999999
 rua bla bla bla n 6
 
