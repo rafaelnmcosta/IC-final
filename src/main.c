@@ -55,7 +55,7 @@ void menu_principal();
 void menu_cliente();
 void menu_conta();
 
-int compara_valor(int, char*, int);
+int encontra_valor(int, char*, int);
 int ordem_alfabetica(char*, char*);
 void organiza_vetor(int);
 
@@ -145,9 +145,9 @@ void menu_principal(){
     while(1){
         printf("\n================== Bem Vindo! ==================\n");
         printf("Digite um comando para prosseguir:\n");
-        printf("C - Gerenciar Clientes\n");
-        printf("T - Gerenciar Contas\n");
-        printf("S - Sair\n");
+        printf(" C - Gerenciar Clientes\n");
+        printf(" T - Gerenciar Contas\n");
+        printf(" S - Sair\n");
         printf("\nEscolha: ");
 
         scanf("%c%*c", &opcao);
@@ -172,57 +172,59 @@ void menu_cliente(){
 
     char opcao;
 
-    printf("=============== Gerenciar Clientes ===============\n");
-    printf("Digite um comando para prosseguir:\n");
-    printf("C - Cadastrar um cliente\n");
-    printf("L - Listar todos os clientes cadastrados\n");
-    printf("B - Buscar cliente ja cadastrado\n");
-    printf("A - Atualizar um cliente cadastrado\n");
-    printf("E - Excluir um cliente cadastrado\n");
-    printf("S - Sair\n");
-    printf("\nEscolha: ");
+    while(1){
+        printf("\n=============== Gerenciar Clientes ===============\n");
+        printf("Digite um comando para prosseguir:\n");
+        printf(" C - Cadastrar um cliente\n");
+        printf(" L - Listar todos os clientes cadastrados\n");
+        printf(" B - Buscar cliente ja cadastrado\n");
+        printf(" A - Atualizar um cliente cadastrado\n");
+        printf(" E - Excluir um cliente cadastrado\n");
+        printf(" S - Sair\n");
+        printf("\nEscolha: ");
 
-    scanf("%c%*c", &opcao);
-    switch (opcao){
-        case 'C':
-            cadastra_cliente();
-        break;
-        case 'L':
-            lista_cliente();
-        break;
-        case 'B':
-            busca_cliente();
-        break;
-        case 'A':
-            //atualiza_cliente();
-        break;
-        case 'E':
-            //exclui_cliente();
-        break;
-        case 'S':
-            printf("Retornando ao menu\n");
-            return;
-        break;
-        default:
-            printf("*!* Comando invalido! *!*\n");
-            menu_cliente();
-        break;
+        scanf("%c%*c", &opcao);
+        switch (opcao){
+            case 'C':
+                cadastra_cliente();
+            break;
+            case 'L':
+                lista_cliente();
+            break;
+            case 'B':
+                busca_cliente();
+            break;
+            case 'A':
+                //atualiza_cliente();
+            break;
+            case 'E':
+                //exclui_cliente();
+            break;
+            case 'S':
+                printf("\nRetornando ao menu principal\n");
+                return;
+            break;
+            default:
+                printf("*!* Comando invalido! *!*\n");
+                menu_cliente();
+            break;
+        }
     }
 }
 
 void menu_conta(){
     char opcao;
 
-    printf("================ Gerenciar Contas ================\n");
+    printf("\n================ Gerenciar Contas ================\n");
     printf("Digite um comando para prosseguir:\n");
-    printf("R - Listagem de todas as contas cadastradas.\n");
-    printf("C - Cadastrar uma conta para um cliente.\n");
-    printf("L - Listar todas as contas de um cliente.\n");
-    printf("W - Realizar um saque em uma conta.\n");
-    printf("D - Realizar um depósito em uma conta.\n");
-    printf("T - Realizar transferencia entre contas.\n");
-    printf("E - Exibir extrato de uma conta.\n");
-    printf("S - Sair\n");
+    printf(" R - Listagem de todas as contas cadastradas.\n");
+    printf(" C - Cadastrar uma conta para um cliente.\n");
+    printf(" L - Listar todas as contas de um cliente.\n");
+    printf(" W - Realizar um saque em uma conta.\n");
+    printf(" D - Realizar um deposito em uma conta.\n");
+    printf(" T - Realizar transferencia entre contas.\n");
+    printf(" E - Exibir extrato de uma conta.\n");
+    printf(" S - Sair\n");
     printf("\nEscolha: ");
 
     scanf("%c%*c", &opcao);
@@ -249,7 +251,7 @@ void menu_conta(){
             //extrato_conta();
         break;
         case 'S':
-            printf("Retornando ao menu\n");
+            printf("\nRetornando ao menu principal\n");
             return;
         break;
         default:
@@ -261,32 +263,26 @@ void menu_conta(){
 
 /**
  * @brief Funcao que realiza uma busca por um determinado valor no vetor de informacoes especificado
- *  e retorna um codigo de acordo com o resultado da busca;
+ *  e retorna a posicao do valor encontrado no vetor, ou -1 caso o valor nao seja encontrado;
+ *  
+ *  Tipos: 1=clientes; 2=contas; 3=transacoes;
+ *    Categorias:
+ *        clientes:
+ *            1=codigo;
+ *            2=cpf/cnpj;
+ *            3=nome;
+ *        contas:
+ *            1=agencia+conta
+ *            2=codigo de cliente
+ *        transacoes:
+ *            1=data; 
  * 
- * @param v_clientes vetor que possui os clientes armazenados;
- * @param v_contas vetor que possui as contas armazenadas;
- * @param v_transacoes vetor que possui as transacoes armazenadas;
  * @param tipo inteiro que define se a busca sera de clientes, contas ou transacoes;
  * @param busca o que sera buscado pela funcao;
  * @param categoria o campo a ser comparado durante a busca;
- * @return codigo referente ao resultado da busca: 1=encontrado 0=nao encontrado
+ * @return posicao no vetor referente ao valor buscado;
  */
-int compara_valor(int tipo, char* busca, int categoria){
-    /*
-    *    Tipos: 1=clientes; 2=contas; 3=transacoes;
-    *
-    *    Categorias:
-    *        clientes:
-    *            1=codigo;
-    *            2=cpf/cnpj;
-    *            3=nome;
-    *        contas:
-    *            1=agencia+conta
-    *            2=codigo de cliente
-    *        transacoes:
-    *            1=data;
-    * 
-    */
+int encontra_valor(int tipo, char* busca, int categoria){
     
     int i;
 
@@ -296,26 +292,26 @@ int compara_valor(int tipo, char* busca, int categoria){
                 case 1:
                     for(i=0; i<MAX_CLIENTES; i++){
                         if(strcmp(v_clientes[i].codigo, busca)==0){
-                            return 1;
+                            return i;
                         }
                     }
-                    return 0;
+                    return -1;
                 break;
                 case 2:
                     for(i=0; i<MAX_CLIENTES; i++){
                         if(strcmp(v_clientes[i].cpf_cnpj, busca)==0){
-                            return 1;
+                            return i;
                         }
                     }
-                    return 0;
+                    return -1;
                 break;
                 case 3:
                     for(i=0; i<MAX_CLIENTES; i++){
                         if(strcmp(v_clientes[i].nome, busca)==0){
-                            return 1;
+                            return i;
                         }
                     }
-                    return 0;
+                    return -1;
                 break;  
             }
         break;
@@ -324,18 +320,18 @@ int compara_valor(int tipo, char* busca, int categoria){
                 case 1:
                     for(i=0; i<MAX_CONTAS; i++){
                         if(strcmp(v_contas[i].agencia_e_nro, busca)==0){
-                            return 1;
+                            return i;
                         }
                     }
-                    return 0;
+                    return -1;
                 break;
                 case 2:
                     for(i=0; i<MAX_CONTAS; i++){
                         if(strcmp(v_contas[i].cliente, busca)==0){
-                            return 1;
+                            return i;
                         }
                     }
-                    return 0;
+                    return -1;
                 break;
             }
         break;
@@ -343,11 +339,11 @@ int compara_valor(int tipo, char* busca, int categoria){
             if(categoria==1){
                 for(i=0; i<MAX_TRANSACOES; i++){
                     if(strcmp(v_transacoes[i].data, busca)==0){
-                        return 1;
+                        return i;
                     }
                 }
             }
-            return 0;
+            return -1;
         break;
     }
 }
@@ -413,8 +409,8 @@ void cadastra_cliente(){
 
     while(1){
         check=1;
-        printf("\n================ Cadastro de clientes ================\n");
-        printf("\nInforme o codigo do novo cliente: ");
+        printf("\n=============== Cadastro de clientes ===============\n");
+        printf("\nInforme o codigo do novo cliente (diferente de 0): ");
         scanf("%s%*c", &novo_cli.codigo);
         printf("\nInforme o nome do novo cliente: ");
         scanf("%[^\n]", &novo_cli.nome);
@@ -426,26 +422,32 @@ void cadastra_cliente(){
         scanf("%[^\n]%*c", &novo_cli.endereco);
 
         for(i=0; i<num_clientes; i++){
-            if(compara_valor(1, novo_cli.codigo, 1)){
+            if(encontra_valor(1, novo_cli.codigo, 1)!=-1){
                 printf("\n\n*!* Ja existe um cliente cadastrado com este codigo! *!*\n");
                 check=0;
                 break;
             }
-            else if(compara_valor(1, novo_cli.cpf_cnpj, 2)){
+            else if(encontra_valor(1, novo_cli.cpf_cnpj, 2)!=-1){
                 printf("\n\n*!* Ja existe um cliente cadastrado com este CPF/CNPJ! *!*\n");
                 check=0;
                 break;
             }
         }
 
+        if(novo_cli.codigo[0]=='0'){
+            printf("\n\n*!* O codigo do cliente nao pode comecar com 0 e nem ser igual a 0! Informe um codigo valido! *!*\n");
+            check=0;
+        }
+
         while(check){
+            printf("-----------------------------------------------------");
             printf("\nPor favor, confirme se as informacoes estao corretas:\n\n");
             printf("Codigo: %s\n", novo_cli.codigo);
             printf("Nome: %s\n", novo_cli.nome);
             printf("CPF/CNPJ: %s\n", novo_cli.cpf_cnpj);
             printf("Telefone: %s\n", novo_cli.telefone);
             printf("Endereco: %s\n", novo_cli.endereco);
-            printf("==============================================");
+            printf("-----------------------------------------------------");
             printf("\nDeseja salvar o cliente assim? (s/n): ");
             scanf("%c%*c", &opcao);
             
@@ -456,7 +458,7 @@ void cadastra_cliente(){
                 }
                 else{
                     printf("\n------ Cliente cadastrado com sucesso!---------\n");
-                    printf("\nRetornando ao menu principal\n");
+                    printf("\nRetornando ao menu\n");
                     num_clientes++;
                     return;
                 }
@@ -466,7 +468,7 @@ void cadastra_cliente(){
                 scanf("%c%*c", &opcao);
 
                 if(opcao=='n' || opcao=='N'){
-                    printf("\nRetornando ao menu principal\n");
+                    printf("\nRetornando ao menu\n");
                     return;
                 }
                 else if(opcao=='s' || opcao=='S'){
@@ -500,28 +502,87 @@ void lista_cliente(){
                 printf("\nEndereco: %s\n", v_clientes[i].endereco);
             }
         }
+        printf("\n----------------- Fim da lista --------------------\n");
+        printf("\nRetornando ao menu\n");
     }
 }
 
 void busca_cliente(){
 
     int i, opcao;
+    char busca[30];
 
     while(1){
-        printf("\n============= Lista de clientes ==================\n");
+        printf("\n============= Busca de clientes ==================\n");
         printf("Informe o metodo que deseja usar para buscar o cliente:\n");
-        printf("1 para buscar por nome;\n2 para buscar por codigo;\n3 para buscar por CPF/CNPJ;\n");
+        printf(" 1 - Busca por codigo;\n 2 - Busca por CPF/CNPJ;\n 3 - Busca por nome;\n 0 - Retornar ao menu;\n");
         printf("\nEscolha: ");
-        scanf("%d", &opcao);
+        scanf("%d%*c", &opcao);
 
         switch(opcao){
+            case 0:
+                printf("\nRetornando ao menu\n");
+                return;
+            break;
             case 1:
+                printf("\nInforme o codigo do cliente a ser buscado: ");
+                scanf("%[^\n]%*c", &busca);
+                i=encontra_valor(1, busca, opcao);
+                if(i!=-1){
+                    printf("\n------------- Cliente encontrado! ---------------");
+                    printf("\nCodigo: %s", v_clientes[i].codigo);
+                    printf("\nNome: %s", v_clientes[i].nome);
+                    printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+                    printf("\nTelefone: %s", v_clientes[i].telefone);
+                    printf("\nEndereco: %s\n", v_clientes[i].endereco);
+                    printf("---------------------------------------------------");
+                    printf("\nRetornando ao menu\n");
+                    return;
+                }
+                else{
+                    printf("\n*!* Nao existe cliente cadastrado com esse codigo! *!*\n");
+                }
             break;
             case 2:
+                printf("\nInforme o CPF/CNPJ do cliente a ser buscado: ");
+                scanf("%[^\n]%*c", &busca);
+                i=encontra_valor(1, busca, opcao);
+                if(i!=-1){
+                    printf("\n------------- Cliente encontrado! ---------------");
+                    printf("\nCodigo: %s", v_clientes[i].codigo);
+                    printf("\nNome: %s", v_clientes[i].nome);
+                    printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+                    printf("\nTelefone: %s", v_clientes[i].telefone);
+                    printf("\nEndereco: %s\n", v_clientes[i].endereco);
+                    printf("---------------------------------------------------");
+                    printf("\nRetornando ao menu\n");
+                    return;
+                }
+                else{
+                    printf("\n*!* Nao existe cliente cadastrado com esse CPF/CNPJ! *!*\n");
+                }
             break;
             case 3:
+                printf("\nInforme o nome COMPLETO do cliente a ser buscado: ");
+                scanf("%[^\n]%*c", &busca);
+                i=encontra_valor(1, busca, opcao);
+                if(i!=-1){
+                    printf("\n------------- Cliente encontrado! ---------------");
+                    printf("\nCodigo: %s", v_clientes[i].codigo);
+                    printf("\nNome: %s", v_clientes[i].nome);
+                    printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+                    printf("\nTelefone: %s", v_clientes[i].telefone);
+                    printf("\nEndereco: %s\n", v_clientes[i].endereco);
+                    printf("---------------------------------------------------");
+                    printf("\nRetornando ao menu\n");
+                    return;
+                }
+                else{
+                    printf("\n*!* Nao existe cliente cadastrado com esse nome! *!*\n");
+                }
             break;
             default:
+                printf("\n*!* Comando invalido! *!*\n");
             break;
         }
     }
