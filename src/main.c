@@ -198,7 +198,7 @@ void menu_cliente(){
                 atualiza_cliente();
             break;
             case 'E':
-                //exclui_cliente();
+                exclui_cliente();
             break;
             case 'S':
                 printf("\nRetornando ao menu principal\n");
@@ -595,8 +595,8 @@ void atualiza_cliente(){
     *   *check==1->pergunta roda
     *   *check==0->pergunta nao roda
     */
-    int i, j, opcao, check1, check2, check3; 
-    char busca[MAX_CPF_CNPJ];
+    int i, j, opcao1, check1, check2, check3; 
+    char busca[MAX_CPF_CNPJ], opcao2;
     CLIENTE cli_atual;
 
     while(1){
@@ -607,9 +607,9 @@ void atualiza_cliente(){
         printf("Informe o metodo que deseja usar para buscar o cliente que deseja alterar:\n");
         printf(" 1 - Busca por codigo;\n 2 - Busca por CPF/CNPJ;\n 0 - Retornar ao menu;\n");
         printf("\nEscolha: ");
-        scanf("%d%*c", &opcao);
+        scanf("%d%*c", &opcao1);
 
-        switch(opcao){
+        switch(opcao1){
             case 0:
                 printf("\nRetornando ao menu\n");
                 return;
@@ -618,13 +618,13 @@ void atualiza_cliente(){
                 printf("\nInforme o codigo do cliente a ser atualizado: ");
                 scanf("%[^\n]%*c", &busca);
 
-                i=encontra_valor(1, busca, opcao);
+                i=encontra_valor(1, busca, opcao1);
             break;
             case 2:
                 printf("\nInforme o CPF/CNPJ do cliente a ser atualizado: ");
                 scanf("%[^\n]%*c", &busca);
 
-                i=encontra_valor(1, busca, opcao);
+                i=encontra_valor(1, busca, opcao1);
             break;
             default:
                 printf("\n*!* Comando invalido! *!*\n");
@@ -680,12 +680,11 @@ void atualiza_cliente(){
                     printf("Telefone: %s\n", cli_atual.telefone);
                     printf("Endereco: %s\n", cli_atual.endereco);
                     printf("-----------------------------------------------------");
-                    
 
                     while(check2){
                         printf("\nDeseja salvar o cliente assim? (s/n): ");
-                        scanf("%c%*c", &opcao);
-                        if(opcao=='s' || opcao=='S'){
+                        scanf("%c%*c", &opcao2);
+                        if(opcao2=='s' || opcao2=='S'){
                             v_clientes[i] = cli_atual;
                             if(strcmp(v_clientes[i].codigo, cli_atual.codigo)!=0){
                                 printf("\n*!* Erro ao cadastrar cliente! *!*\n");
@@ -697,16 +696,16 @@ void atualiza_cliente(){
                                 return;
                             }
                         }
-                        else if(opcao=='n' || opcao=='N'){
+                        else if(opcao2=='n' || opcao2=='N'){
 
                             while(check3){
                                 printf("\nDeseja inserir novamente os dados? (s/n): ");
-                                scanf("%c%*c", &opcao);
-                                if(opcao=='n' || opcao=='N'){
+                                scanf("%c%*c", &opcao2);
+                                if(opcao2=='n' || opcao2=='N'){
                                     printf("\nRetornando ao menu\n");
                                     return;
                                 }
-                                else if(opcao=='s' || opcao=='S'){
+                                else if(opcao2=='s' || opcao2=='S'){
                                     printf("-----------------------------------------------------");
                                     check2=0;
                                     check3=0;
@@ -725,10 +724,91 @@ void atualiza_cliente(){
             }
         }
         else{
-            switch(opcao){
+            switch(opcao1){
                 case 1:
                     printf("\n*!* Nao existe cliente cadastrado com esse codigo! *!*\n");
-                
+                break;
+                case 2:
+                    printf("\n*!* Nao existe cliente cadastrado com esse CPF/CNPJ! *!*\n");
+                break;
+            }
+        }
+    }
+}
+
+void exclui_cliente(){
+    int i, opcao1, check; 
+    char busca[MAX_CPF_CNPJ], opcao2;
+
+    while(1){
+        check=1;
+        printf("\n============= Exclusao de cliente ===============\n");
+        printf("Informe o metodo que deseja usar para buscar o cliente que deseja excluir:\n");
+        printf(" 1 - Busca por codigo;\n 2 - Busca por CPF/CNPJ;\n 0 - Retornar ao menu;\n");
+        printf("\nEscolha: ");
+        scanf("%d%*c", &opcao1);
+
+        switch(opcao1){
+            case 0:
+                printf("\nRetornando ao menu\n");
+                return;
+            break; 
+            case 1:
+                printf("\nInforme o codigo do cliente a ser excluido: ");
+                scanf("%[^\n]%*c", &busca);
+
+                i=encontra_valor(1, busca, opcao1);
+            break;
+            case 2:
+                printf("\nInforme o CPF/CNPJ do cliente a ser excluido: ");
+                scanf("%[^\n]%*c", &busca);
+
+                i=encontra_valor(1, busca, opcao1);
+            break;
+            default:
+                printf("\n*!* Comando invalido! *!*\n");
+                scanf("%*c");
+            break;
+        }
+
+        if(i!=-1){
+            printf("\n------------- Cliente encontrado! ---------------");
+            printf("\nCodigo: %s", v_clientes[i].codigo);
+            printf("\nNome: %s", v_clientes[i].nome);
+            printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+            printf("\nTelefone: %s", v_clientes[i].telefone);
+            printf("\nEndereco: %s\n", v_clientes[i].endereco);
+            printf("---------------------------------------------------\n");
+
+            while(check){
+                printf("\n*!* Deseja mesmo excluir este cliente permanentemente? *!* (s/n): ");
+                scanf("%c%*c", &opcao2);
+                if(opcao2=='s' || opcao2=='S'){
+                    printf("\n Excluindo o cliente %s\n", v_clientes[i].nome);
+                    strcpy(v_clientes[i].codigo, "0");
+                    if(!strcmp(v_clientes[i].codigo,"0")){
+                        printf("\n------------- Cliente excluido! ---------------\n");
+                        printf("\nRetornando ao menu\n");
+                        return;
+                    }
+                    else{
+                        printf("\n*!* Erro ao excluir cliente! *!*\n");
+                        check=0;
+                    }
+                }
+                else if(opcao2=='n' || opcao2=='N'){
+                    printf("\n Retornando ao inicio\n");
+                    check=0;
+                }
+                else{
+                    printf("\n*!* Comando invalido! *!*\n");
+                }
+            }
+        }
+        else{
+            switch(opcao1){
+                case 1:
+                    printf("\n*!* Nao existe cliente cadastrado com esse codigo! *!*\n");
                 break;
                 case 2:
                     printf("\n*!* Nao existe cliente cadastrado com esse CPF/CNPJ! *!*\n");
