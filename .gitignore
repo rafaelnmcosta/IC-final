@@ -5,6 +5,7 @@
 # de teste
 # pasta do vscode
 # de input e output
+# bancos de dados em txt
 
 
 /.vscode
@@ -12,6 +13,7 @@
 input
 output
 
+*.txt
 *.exe
 *.out
 *.rar

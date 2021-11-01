@@ -13,7 +13,7 @@
 #define MAX_CLIENTES 100
 #define MAX_CONTAS 200
 #define MAX_TRANSACOES 1000
-#define MAX_DATA 12
+#define MAX_DATA 18
 
 typedef struct cliente{
     char codigo[MAX_CODIGO];
@@ -30,26 +30,30 @@ typedef struct conta{
 } CONTA;
 
 typedef struct transacao{
-    char tipo; // 'd'=debito 'c'=credito
+    int tipo; // 1=debito 2=credito
     float valor;
-    char data[MAX_DATA]; // formato data[0]=dia data[1]=mes data[2]=ano;
-    char conta[MAX_AGENCIA_E_NRO]; // agencia + codigo
+    char data[MAX_DATA];
+    char conta[MAX_AGENCIA_E_NRO]; // agencia + codigo (aaaccccccc)
 } TRANSACAO;
 
 /*------------- Variaveis globais que armazenam os dados ----------*/
-    CLIENTE * v_clientes;
-    CONTA * v_contas;
-    TRANSACAO * v_transacoes;
+
+    CLIENTE * v_clientes; //vetor que guarda os clientes em tempo de execução
+    CONTA * v_contas; //vetor que guarda as contas em tempo de execução
+    TRANSACAO * v_transacoes; //vetor que guarda as transacoes em tempo de execução
+
     int num_clientes=0; //numero de clientes cadastrados atualmente
     int num_contas=0; //numero de contas cadastrados atualmente
     int num_transacoes=0; //numero de transacoes cadastrados atualmente
+
     FILE * cli_db; //Base de dados de clientes
     FILE * ct_db; //Base de dados de contas
     FILE * tr_db; //Base de dados de transacoes
+
 /*----------------------------------------------------------------*/
 
 void boot();
-//void quit(CLIENTE*, CONTA*, TRANSACAO*, FILE*, FILE*, FILE*);
+void quit();
 
 void menu_principal();
 void menu_cliente();
@@ -79,6 +83,8 @@ int main(){
     boot();
 
     menu_principal();
+
+    quit();
 
     return 0;
 }
@@ -123,7 +129,7 @@ void boot(){
     if(tr_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE TRANSACOES *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
         i=0;
-        while(fscanf(tr_db, "%c %f %s %s", &tr_atual.tipo, &tr_atual.valor, &tr_atual.data, &tr_atual.conta)!=EOF){
+        while(fscanf(tr_db, "%d %f %s %s", &tr_atual.tipo, &tr_atual.valor, &tr_atual.data, &tr_atual.conta)!=EOF){
             v_transacoes[i]=tr_atual;
             num_transacoes++;
             i++;
@@ -132,11 +138,52 @@ void boot(){
     fclose(tr_db);
 }
 
-/*
-void quit(CLIENTE* v_clientes, CONTA* v_contas, TRANSACAO* v_transacoes, FILE* cli_db, FILE* ct_db, FILE* tr_db){
 
+void quit(){
+
+    CLIENTE cli_atual;
+    CONTA ct_atual;
+    TRANSACAO tr_atual;
+
+    int i;
+
+    cli_db = fopen("dados_clientes.txt", "w");
+    if(cli_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel!\n\n");
+    else{
+        for(i=0; i<num_clientes; i++){
+            if(v_clientes[i].codigo[0]!=NULL){
+                cli_atual = v_clientes[i];
+                fprintf(cli_db, "%s\n%s\n%s\n%s\n%s\n", cli_atual.codigo, cli_atual.nome, cli_atual.cpf_cnpj, cli_atual.telefone, cli_atual.endereco);
+            }
+        }
+    }
+    fclose(cli_db);
+
+    ct_db = fopen("dados_contas.txt", "w");
+    if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel!\n\n");
+    else{
+        for(i=0; i<num_contas; i++){
+            if(v_contas[i].agencia_e_nro[0]!=NULL){
+                ct_atual = v_contas[i];
+                fprintf(cli_db, "%s\n%s\n%.2f\n", ct_atual.agencia_e_nro, ct_atual.cliente, ct_atual.saldo);
+            }
+        }
+    }
+    fclose(ct_db);
+
+    tr_db = fopen("dados_transacoes.txt", "w");
+    if(tr_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel!\n\n");
+    else{
+        for(i=0; i<num_transacoes; i++){
+            if(v_transacoes[i].data[0]!=NULL){
+                tr_atual = v_transacoes[i];
+                fprintf(tr_db, "%d\n%.2f\n%s\n%s\n", tr_atual.tipo, tr_atual.valor, tr_atual.data, tr_atual.conta);
+            }
+        }
+    }
+    fclose(tr_db);
 }
-*/
+
 
 void menu_principal(){
 
