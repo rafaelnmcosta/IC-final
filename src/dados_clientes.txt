@@ -1,0 +1,15 @@
+1
+Cliente 1
+123456789
+40028922
+Rua dos bobos, numero 0
+2
+Cliente 2
+987654321
+(62)99999-9999
+Rua bla bla bla, nro segredo vem inbox
+admin
+Administrador foda
+cpf_foda
+tel_foda
+Casa foda na Rua foda

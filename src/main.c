@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_CODIGO 8
+#define MAX_CODIGO 10
 #define MAX_NOME 30
-#define MAX_CPF_CNPJ 18
+#define MAX_CPF_CNPJ 20
 #define MAX_TEL 15
 #define MAX_END 100
 
-#define MAX_AGENCIA_E_NRO 10
+#define MAX_AGENCIA 5
+#define MAX_NUMERO 10
 
 #define MAX_CLIENTES 100
 #define MAX_CONTAS 200
@@ -24,7 +25,8 @@ typedef struct cliente{
 } CLIENTE;
 
 typedef struct conta{
-    char agencia_e_nro[MAX_AGENCIA_E_NRO];
+    char agencia[MAX_AGENCIA];
+    char numero[MAX_NUMERO];
     char cliente[MAX_CODIGO]; //codigo do cliente;
     float saldo;
 } CONTA;
@@ -33,7 +35,7 @@ typedef struct transacao{
     int tipo; // 1=debito 2=credito
     float valor;
     char data[MAX_DATA];
-    char conta[MAX_AGENCIA_E_NRO]; // agencia + codigo (aaaccccccc)
+    char conta[MAX_AGENCIA+MAX_NUMERO]; // agencia + codigo (aaaccccccc)
 } TRANSACAO;
 
 /*------------- Variaveis globais que armazenam os dados ----------*/
@@ -117,7 +119,7 @@ void boot(){
     if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CONTAS *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
         i=0;
-        while(fscanf(ct_db, "%s %s %f", &ct_atual.agencia_e_nro, &ct_atual.cliente, &ct_atual.saldo)!=EOF){
+        while(fscanf(ct_db, "%s %s %s %f", &ct_atual.agencia, &ct_atual.numero, &ct_atual.cliente, &ct_atual.saldo)!=EOF){
             v_contas[i]=ct_atual;
             num_contas++;
             i++;
@@ -163,9 +165,9 @@ void quit(){
     if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel!\n\n");
     else{
         for(i=0; i<num_contas; i++){
-            if(v_contas[i].agencia_e_nro[0]!=NULL){
+            if(v_contas[i].cliente[0]!=NULL){
                 ct_atual = v_contas[i];
-                fprintf(cli_db, "%s\n%s\n%.2f\n", ct_atual.agencia_e_nro, ct_atual.cliente, ct_atual.saldo);
+                fprintf(cli_db, "%s\n%s\n%s\n%.2f\n", ct_atual.agencia, ct_atual.numero, ct_atual.cliente, ct_atual.saldo);
             }
         }
     }
@@ -202,10 +204,19 @@ void menu_principal(){
             case'C':
                 menu_cliente();
             break;
+            case'c':
+                menu_cliente();
+            break;
             case'T':
                 menu_conta();
             break;
+            case't':
+                menu_conta();
+            break;
             case'S':
+                return;
+            break;
+            case's':
                 return;
             break;
             default:
@@ -235,19 +246,38 @@ void menu_cliente(){
             case 'C':
                 cadastra_cliente();
             break;
+            case 'c':
+                cadastra_cliente();
+            break;
             case 'L':
+                lista_cliente();
+            break;
+            case 'l':
                 lista_cliente();
             break;
             case 'B':
                 busca_cliente();
             break;
+            case 'b':
+                busca_cliente();
+            break;
             case 'A':
+                atualiza_cliente();
+            break;
+            case 'a':
                 atualiza_cliente();
             break;
             case 'E':
                 exclui_cliente();
             break;
+            case 'e':
+                exclui_cliente();
+            break;
             case 'S':
+                printf("\nRetornando ao menu principal\n");
+                return;
+            break;
+            case 's':
                 printf("\nRetornando ao menu principal\n");
                 return;
             break;
@@ -261,49 +291,75 @@ void menu_cliente(){
 void menu_conta(){
     char opcao;
 
-    printf("\n================= Gerenciar Contas =================\n");
-    printf("Digite um comando para prosseguir:\n");
-    printf(" R - Listagem de todas as contas cadastradas.\n");
-    printf(" C - Cadastrar uma conta para um cliente.\n");
-    printf(" L - Listar todas as contas de um cliente.\n");
-    printf(" W - Realizar um saque em uma conta.\n");
-    printf(" D - Realizar um deposito em uma conta.\n");
-    printf(" T - Realizar transferencia entre contas.\n");
-    printf(" E - Exibir extrato de uma conta.\n");
-    printf(" S - Sair\n");
-    printf("\nEscolha: ");
+    while(1){
+        printf("\n================= Gerenciar Contas =================\n");
+        printf("Digite um comando para prosseguir:\n");
+        printf(" R - Listagem de todas as contas cadastradas.\n");
+        printf(" C - Cadastrar uma conta para um cliente.\n");
+        printf(" L - Listar todas as contas de um cliente.\n");
+        printf(" W - Realizar um saque em uma conta.\n");
+        printf(" D - Realizar um deposito em uma conta.\n");
+        printf(" T - Realizar transferencia entre contas.\n");
+        printf(" E - Exibir extrato de uma conta.\n");
+        printf(" S - Sair\n");
+        printf("\nEscolha: ");
 
-    scanf("%c%*c", &opcao);
-    switch (opcao){
-        case 'R':
-            //lista_conta();
-        break;
-        case 'C':
-            //cadastra_conta_p_cliente();
-        break;
-        case 'L':
-            //lista_conta_p_cliente();
-        break;
-        case 'W':
-            //saca_conta();
-        break;
-        case 'D':
-            //deposita_conta();
-        break;
-        case 'T':
-            //transfere_conta();
-        break;
-        case 'E':
-            //extrato_conta();
-        break;
-        case 'S':
-            printf("\nRetornando ao menu principal\n");
-            return;
-        break;
-        default:
-            printf("*!* Comando invalido! *!*\n");
-            menu_conta();
-        break;
+        scanf("%c%*c", &opcao);
+        switch (opcao){
+            case 'R':
+                lista_conta();
+            break;
+            case 'r':
+                lista_conta();
+            break;
+            case 'C':
+                //cadastra_conta_p_cliente();
+            break;
+            case 'c':
+                //cadastra_conta_p_cliente();
+            break;
+            case 'L':
+                //lista_conta_p_cliente();
+            break;
+            case 'l':
+                //lista_conta_p_cliente();
+            break;
+            case 'W':
+                //saca_conta();
+            break;
+            case 'w':
+                //saca_conta();
+            break;
+            case 'D':
+                //deposita_conta();
+            break;
+            case 'd':
+                //deposita_conta();
+            break;
+            case 'T':
+                //transfere_conta();
+            break;
+            case 't':
+                //transfere_conta();
+            break;
+            case 'E':
+                //extrato_conta();
+            break;
+            case 'e':
+                //extrato_conta();
+            break;
+            case 'S':
+                printf("\nRetornando ao menu principal\n");
+                return;
+            break;
+            case 's':
+                printf("\nRetornando ao menu principal\n");
+                return;
+            break;
+            default:
+                printf("\n*!* Comando invalido! *!*\n");
+            break;
+        }
     }
 }
 
@@ -331,6 +387,7 @@ void menu_conta(){
 int encontra_valor(int tipo, char* busca, int categoria){
     
     int i;
+    char agencia_e_nro[MAX_AGENCIA+MAX_NUMERO];
 
     switch(tipo){
         case 1:
@@ -365,7 +422,9 @@ int encontra_valor(int tipo, char* busca, int categoria){
             switch(categoria){
                 case 1:
                     for(i=0; i<num_contas; i++){
-                        if(strcmp(v_contas[i].agencia_e_nro, busca)==0){
+                        strcpy(agencia_e_nro, v_contas[i].agencia);
+                        strcat(agencia_e_nro, v_contas[i].numero);
+                        if(strcmp(agencia_e_nro, busca)==0){
                             return i;
                         }
                     }
@@ -846,5 +905,31 @@ void exclui_cliente(){
                 break;
             }
         }
+    }
+}
+
+void lista_conta(){
+
+    int i, cont=0;
+    
+    for(i=0; i<num_contas; i++){
+        if(v_contas[i].cliente[0]!=NULL) cont++;
+    }
+
+    if(cont==0){
+        printf("\n*!* Nenhuma conta cadastrada! *!*\n");
+    }
+    else{
+        printf("\n============= Lista de contas ==================\n");    
+        for(i=0; i<num_contas; i++){
+            if(v_contas[i].cliente[0]!=NULL){
+                printf("\nCliente: %s", v_contas[i].cliente);
+                printf("\nAgencia: %s", v_contas[i].agencia);
+                printf("\nNumero: %s", v_contas[i].numero);
+                printf("\nSaldo: %.2f\n", v_contas[i].saldo);
+            }
+        }
+        printf("\n----------------- Fim da lista --------------------\n");
+        printf("\nRetornando ao menu\n");
     }
 }
