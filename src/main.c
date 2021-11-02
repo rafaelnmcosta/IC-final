@@ -292,7 +292,7 @@ void menu_conta(){
     char opcao;
 
     while(1){
-        printf("\n================= Gerenciar Contas =================\n");
+        printf("\n=============== Gerenciar Contas ==================\n");
         printf("Digite um comando para prosseguir:\n");
         printf(" R - Listagem de todas as contas cadastradas.\n");
         printf(" C - Cadastrar uma conta para um cliente.\n");
@@ -319,10 +319,10 @@ void menu_conta(){
                 cadastra_conta_p_cliente();
             break;
             case 'L':
-                //lista_conta_p_cliente();
+                lista_conta_p_cliente();
             break;
             case 'l':
-                //lista_conta_p_cliente();
+                lista_conta_p_cliente();
             break;
             case 'W':
                 //saca_conta();
@@ -584,6 +584,7 @@ void cadastra_cliente(){
             }
             else{
                 printf("\n*!* Comando invalido! *!*\n");
+                fflush(stdin);
             }
         }
     }
@@ -637,15 +638,19 @@ void busca_cliente(){
             case 1:
                 printf("\nInforme o codigo do cliente a ser buscado: ");
                 scanf("%[^\n]%*c", &busca);
+                fflush(stdin);
                 i=encontra_valor(1, busca, opcao);
             break;
             case 2:
                 printf("\nInforme o CPF/CNPJ do cliente a ser buscado: ");
                 scanf("%[^\n]%*c", &busca);
+                fflush(stdin);
                 i=encontra_valor(1, busca, opcao);
+            break;
             case 3:
                 printf("\nInforme o nome COMPLETO do cliente a ser buscado: ");
                 scanf("%[^\n]%*c", &busca);
+                fflush(stdin);
                 i=encontra_valor(1, busca, opcao);
             break;
             default:
@@ -710,13 +715,13 @@ void atualiza_cliente(){
             case 1:
                 printf("\nInforme o codigo do cliente a ser atualizado: ");
                 scanf("%[^\n]%*c", &busca);
-
+                fflush(stdin);
                 i=encontra_valor(1, busca, opcao1);
             break;
             case 2:
                 printf("\nInforme o CPF/CNPJ do cliente a ser atualizado: ");
                 scanf("%[^\n]%*c", &busca);
-
+                fflush(stdin);
                 i=encontra_valor(1, busca, opcao1);
             break;
             default:
@@ -843,13 +848,13 @@ void exclui_cliente(){
             case 1:
                 printf("\nInforme o codigo do cliente a ser excluido: ");
                 scanf("%[^\n]%*c", &busca);
-
+                fflush(stdin);
                 i=encontra_valor(1, busca, opcao1);
             break;
             case 2:
                 printf("\nInforme o CPF/CNPJ do cliente a ser excluido: ");
                 scanf("%[^\n]%*c", &busca);
-
+                fflush(stdin);
                 i=encontra_valor(1, busca, opcao1);
             break;
             default:
@@ -964,6 +969,7 @@ void cadastra_conta_p_cliente(){
                 printf("\nInforme o CPF/CNPJ do cliente a ser buscado: ");
                 scanf("%[^\n]%*c", &busca_cliente);
                 i=encontra_valor(1, busca_cliente, opcao1);
+            break;
             default:
                 printf("\n*!* Comando invalido! *!*\n");
                 fflush(stdin);
@@ -1059,6 +1065,82 @@ void cadastra_conta_p_cliente(){
         }
         else{
             switch(opcao1){
+                case 1:
+                    printf("\n*!* Nao existe cliente cadastrado com esse codigo! *!*\n");
+                break;
+                case 2:
+                    printf("\n*!* Nao existe cliente cadastrado com esse CPF/CNPJ! *!*\n");
+                break;
+            }
+        }
+    }
+}
+
+void lista_conta_p_cliente(){
+    int i, j, opcao, check;
+    char cli[MAX_CODIGO], busca_cliente[MAX_CODIGO];
+
+    while(1){
+        check=1;
+        printf("\n========= Listagem de contas de um cliente =========\n");
+        printf("Informe o metodo que deseja usar para buscar o cliente dono das contas a listar:\n");
+        printf(" 1 - Busca por codigo;\n 2 - Busca por CPF/CNPJ;\n 0 - Retornar ao menu;\n");
+        printf("\nEscolha: ");
+        scanf("%d%*c", &opcao);
+        fflush(stdin);
+
+        switch(opcao){
+            case 0:
+                printf("\nRetornando ao menu\n");
+                return;
+            break;
+            case 1:
+                printf("\nInforme o codigo do cliente a ser buscado: ");
+                scanf("%[^\n]%*c", &busca_cliente);
+                fflush(stdin);
+                i=encontra_valor(1, busca_cliente, opcao);
+            break;
+            case 2:
+                printf("\nInforme o CPF/CNPJ do cliente a ser buscado: ");
+                scanf("%[^\n]%*c", &busca_cliente);
+                fflush(stdin);
+                i=encontra_valor(1, busca_cliente, opcao);
+            break;
+            default:
+                printf("\n*!* Comando invalido! *!*\n");
+                fflush(stdin);
+                check=0;
+            break;
+        }
+        if(i!=-1 && check){
+            printf("\n------------- Cliente encontrado! ---------------");
+            printf("\nCodigo: %s", v_clientes[i].codigo);
+            printf("\nNome: %s", v_clientes[i].nome);
+            printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+            printf("\nTelefone: %s", v_clientes[i].telefone);
+            printf("\nEndereco: %s\n", v_clientes[i].endereco);
+
+            strcpy(cli, v_clientes[i].codigo);
+
+            j=encontra_valor(2, cli, 2);
+            if(j!=-1){ 
+                printf("\n---------- Lista de contas vinculadas -------------\n");
+                for(j=0; j<num_contas; j++){
+                    if(!strcmp(v_contas[j].cliente, v_clientes[i].codigo)){
+                        printf("\nCliente: %s", v_contas[j].cliente);
+                        printf("\nAgencia: %s", v_contas[j].agencia);
+                        printf("\nNumero: %s", v_contas[j].numero);
+                        printf("\nSaldo: %.2f\n", v_contas[j].saldo);
+                    }
+                }
+                printf("\n----------------- Fim da lista --------------------\n");
+            }
+            else{
+                printf("*!* Nao existe conta vinculada a esse cliente ainda! *!*\n");
+            }
+        }
+        else{
+            switch(opcao){
                 case 1:
                     printf("\n*!* Nao existe cliente cadastrado com esse codigo! *!*\n");
                 break;
