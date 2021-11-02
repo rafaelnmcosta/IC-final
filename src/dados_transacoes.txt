@@ -4,7 +4,12 @@ CREDITO
 42069690
 Descricao da transacao foda
 DEBITO
-10.00
+20.00
 02/11/2021
 42069690
 Teste do primeiro saque
+CREDITO
+20.00
+02/11/2021
+12378780
+Teste do primeiro deposito

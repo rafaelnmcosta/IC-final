@@ -188,7 +188,6 @@ void boot(){
     fclose(tr_db);
 }
 
-
 void quit(){
 
     CLIENTE cli_atual;
@@ -379,10 +378,10 @@ void menu_conta(){
                 saca_conta();
             break;
             case 'D':
-                //deposita_conta();
+                deposita_conta();
             break;
             case 'd':
-                //deposita_conta();
+                deposita_conta();
             break;
             case 'T':
                 //transfere_conta();
@@ -410,6 +409,7 @@ void menu_conta(){
         }
     }
 }
+
 
 /**
  * @brief Funcao que realiza uma busca por um determinado valor no vetor de informacoes especificado
@@ -961,6 +961,7 @@ void exclui_cliente(){
     }
 }
 
+
 void lista_conta(){
 
     int i, cont=0;
@@ -1199,11 +1200,13 @@ void lista_conta_p_cliente(){
         }
     }
 }
+
 /*
 void conta_notas(int valor){
 
 }
 */
+
 void saca_conta(){
     int i, j, check;
     char opcao, agencia[MAX_AGENCIA], numero[MAX_NUMERO], busca_conta[MAX_AGENCIA+MAX_NUMERO], cliente[MAX_CODIGO];
@@ -1251,17 +1254,19 @@ void saca_conta(){
                 }
                 else if(valor>v_contas[j].saldo){
                     printf("\n*!* O saldo da conta e insuficiente para este saque! *!*\n");
-                    printf("\nDeseja tentar novamente? (s/n): ");
-                    scanf("%c%*c", &opcao);
-                    if(opcao=='s' || opcao=='S'){
-                        break;
-                    }
-                    else if(opcao=='n' || opcao=='N'){
-                        printf("\nRetornando ao menu\n");
-                        return;
-                    }
-                    else{
-                        printf("\n*!* Comando invalido! *!*\n");
+                    while(1){
+                        printf("\nDeseja tentar novamente? (s/n): ");
+                        scanf("%c%*c", &opcao);
+                        if(opcao=='s' || opcao=='S'){
+                            break;
+                        }
+                        else if(opcao=='n' || opcao=='N'){
+                            printf("\nRetornando ao menu\n");
+                            return;
+                        }
+                        else{
+                            printf("\n*!* Comando invalido! *!*\n");
+                        }
                     }
                 }
                 else{
@@ -1276,9 +1281,99 @@ void saca_conta(){
                     v_transacoes[num_transacoes]=saque;
 
                     if(!strcmp(saque.conta, v_transacoes[num_transacoes].conta) && saque.valor==v_transacoes[num_transacoes].valor){
+                        v_contas[j].saldo -= valor;
                         num_transacoes++;
                         printf("\n-------------- Saque realizado! ---------------\n");
                         //conta_notas((int)valor);
+                        return;
+                    }
+                    else{
+                        printf("\n*!* Ocorreu um erro ao realizar a operacao! *!*\n");
+                        check=0;
+                    }
+                }
+            }
+        }
+        else{
+            printf("\n*!* Nao existe uma conta cadastrada com essa agencia e numero! *!*\n");
+            while(1){
+                printf("\nDeseja tentar novamente? (s/n): ");
+                scanf("%c%*c", &opcao);
+                if(opcao=='s' || opcao=='S'){
+                    break;
+                }
+                else if(opcao=='n' || opcao=='N'){
+                    printf("\nRetornando ao menu\n");
+                    return;
+                }
+                else{
+                    printf("\n*!* Comando invalido! *!*\n");
+                }
+            }
+        }
+    }
+}
+
+void deposita_conta(){
+    int i, j, check;
+    char opcao, agencia[MAX_AGENCIA], numero[MAX_NUMERO], busca_conta[MAX_AGENCIA+MAX_NUMERO], cliente[MAX_CODIGO];
+    float valor;
+
+    TRANSACAO deposito;
+
+    while(1){
+        check=1;
+        printf("\n================ Deposito em conta ================\n");
+        printf("\nInforme a agencia da conta em que deseja depositar: ");
+        scanf("%s%*c", &agencia);
+        printf("\nInforme o numero da conta em que deseja depositar: ");
+        scanf("%s%*c", &numero);
+
+        strcpy(busca_conta, agencia);
+        strcat(busca_conta, numero);
+        j=encontra_valor(2, busca_conta, 1);
+
+        if(j!=-1){
+            strcpy(cliente, v_contas[j].cliente);
+            i=encontra_valor(1, cliente, 1);
+
+            printf("\n------------- Conta encontrada! ---------------");
+            printf("\nCliente: %s", v_contas[j].cliente);
+            printf("\nAgencia: %s", v_contas[j].agencia);
+            printf("\nNumero: %s", v_contas[j].numero);
+            printf("\nSaldo: %.2f\n", v_contas[j].saldo);
+            printf("\n----------- Dados do cliente dono -------------");
+            printf("\nCodigo: %s", v_clientes[i].codigo);
+            printf("\nNome: %s", v_clientes[i].nome);
+            printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+            printf("\nTelefone: %s", v_clientes[i].telefone);
+            printf("\nEndereco: %s", v_clientes[i].endereco);
+            printf("\n-----------------------------------------------\n");
+
+            while(check){
+                printf("\nInforme o valor que deseja depositar (0 para cancelar): ");
+                scanf("%f%*c", &valor);
+                fflush(stdin);
+
+                if(valor==0){
+                    printf("\nRetornando ao inicio\n");
+                    check=0;
+                }
+                else{
+                    printf("\nInforme uma descricao para este deposito:\n\n");
+                    scanf("%[^\n]%*c", deposito.descricao);
+                    fflush(stdin);
+                    strcpy(deposito.tipo, "CREDITO");
+                    strcpy(deposito.conta, busca_conta);
+                    strcpy(deposito.data, data_hoje);
+                    deposito.valor=valor;
+
+                    v_transacoes[num_transacoes]=deposito;
+
+                    if(!strcmp(deposito.conta, v_transacoes[num_transacoes].conta) && deposito.valor==v_transacoes[num_transacoes].valor){
+                        v_contas[j].saldo += valor;
+                        num_transacoes++;
+                        printf("\n------------ Deposito realizado! --------------\n");
                         return;
                     }
                     else{
