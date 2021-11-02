@@ -1,4 +1,10 @@
-2
+CREDITO
 69.69
 01/11/2021
 42069690
+Descricao da transacao foda
+DEBITO
+10.00
+02/11/2021
+42069690
+Teste do primeiro saque

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #define MAX_CODIGO 10
 #define MAX_NOME 30
@@ -10,6 +11,9 @@
 
 #define MAX_AGENCIA 5
 #define MAX_NUMERO 10
+
+#define MAX_DESCRICAO 100
+#define MAX_TIPO 10
 
 #define MAX_CLIENTES 100
 #define MAX_CONTAS 200
@@ -32,10 +36,11 @@ typedef struct conta{
 } CONTA;
 
 typedef struct transacao{
-    int tipo; // 1=debito 2=credito
+    char tipo[MAX_TIPO];
     float valor;
     char data[MAX_DATA];
     char conta[MAX_AGENCIA+MAX_NUMERO]; // agencia + codigo (aaaccccccc)
+    char descricao[MAX_DESCRICAO];
 } TRANSACAO;
 
 /*------------- Variaveis globais que armazenam os dados ----------*/
@@ -44,9 +49,11 @@ typedef struct transacao{
     CONTA * v_contas; //vetor que guarda as contas em tempo de execução
     TRANSACAO * v_transacoes; //vetor que guarda as transacoes em tempo de execução
 
-    int num_clientes=0; //numero de clientes cadastrados atualmente
-    int num_contas=0; //numero de contas cadastrados atualmente
-    int num_transacoes=0; //numero de transacoes cadastrados atualmente
+    int num_clientes; //numero de clientes cadastrados atualmente
+    int num_contas; //numero de contas cadastrados atualmente
+    int num_transacoes; //numero de transacoes cadastrados atualmente
+
+    char data_hoje[MAX_DATA]; //String que armazena a data em que o programa é executado
 
     FILE * cli_db; //Base de dados de clientes
     FILE * ct_db; //Base de dados de contas
@@ -54,6 +61,7 @@ typedef struct transacao{
 
 /*----------------------------------------------------------------*/
 
+void gera_data();
 void boot();
 void quit();
 
@@ -64,6 +72,7 @@ void menu_conta();
 int encontra_valor(int, char*, int);
 int ordem_alfabetica(char*, char*);
 void organiza_vetor(int);
+void conta_notas(int);
 
 void cadastra_cliente();
 void lista_cliente();
@@ -91,7 +100,43 @@ int main(){
     return 0;
 }
 
+void gera_data(){
+
+    struct tm *p;
+    time_t seconds;
+    char c_day[3], c_month[3], c_year[3], zero[]="0";
+    int day, month, year; 
+
+    time(&seconds);
+    p = localtime(&seconds);
+
+    day = p->tm_mday;
+    month = p->tm_mon+1;
+    year = p->tm_year+1900;
+
+    itoa(day, c_day, 10);
+    if(day<10){
+        strcat(zero, c_day);
+        strcpy(c_day, zero);
+    }
+    strcpy(data_hoje, c_day);
+    strcat(data_hoje, "/");
+
+    itoa(month, c_month, 10);
+    if(month<10){
+        strcat(zero, c_month);
+        strcpy(c_month, zero);
+    }
+    strcat(data_hoje, c_month);
+    strcat(data_hoje, "/");
+
+    itoa(year, c_year, 10);
+    strcat(data_hoje, c_year);
+}
+
 void boot(){
+
+    gera_data();
 
     v_clientes = (CLIENTE *) calloc(MAX_CLIENTES, sizeof(CLIENTE));
     v_contas = (CONTA *) calloc(MAX_CONTAS, sizeof(CONTA));
@@ -103,6 +148,7 @@ void boot(){
 
     int i;
 
+    num_clientes=0;
     cli_db = fopen("dados_clientes.txt", "r");
     if(cli_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
@@ -115,6 +161,7 @@ void boot(){
     }
     fclose(cli_db);
 
+    num_contas=0;
     ct_db = fopen("dados_contas.txt", "r");
     if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CONTAS *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
@@ -127,11 +174,12 @@ void boot(){
     }
     fclose(ct_db);
 
+    num_transacoes=0;
     tr_db = fopen("dados_transacoes.txt", "r");
     if(tr_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE TRANSACOES *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
         i=0;
-        while(fscanf(tr_db, "%d %f %s %s", &tr_atual.tipo, &tr_atual.valor, &tr_atual.data, &tr_atual.conta)!=EOF){
+        while(fscanf(tr_db, "%s %f %s %s %[^\n]", &tr_atual.tipo, &tr_atual.valor, &tr_atual.data, &tr_atual.conta, &tr_atual.descricao)!=EOF){
             v_transacoes[i]=tr_atual;
             num_transacoes++;
             i++;
@@ -179,7 +227,7 @@ void quit(){
         for(i=0; i<num_transacoes; i++){
             if(v_transacoes[i].data[0]!=NULL){
                 tr_atual = v_transacoes[i];
-                fprintf(tr_db, "%d\n%.2f\n%s\n%s\n", tr_atual.tipo, tr_atual.valor, tr_atual.data, tr_atual.conta);
+                fprintf(tr_db, "%s\n%.2f\n%s\n%s\n%s\n", tr_atual.tipo, tr_atual.valor, tr_atual.data, tr_atual.conta, tr_atual.descricao);
             }
         }
     }
@@ -325,10 +373,10 @@ void menu_conta(){
                 lista_conta_p_cliente();
             break;
             case 'W':
-                //saca_conta();
+                saca_conta();
             break;
             case 'w':
-                //saca_conta();
+                saca_conta();
             break;
             case 'D':
                 //deposita_conta();
@@ -1147,6 +1195,114 @@ void lista_conta_p_cliente(){
                 case 2:
                     printf("\n*!* Nao existe cliente cadastrado com esse CPF/CNPJ! *!*\n");
                 break;
+            }
+        }
+    }
+}
+/*
+void conta_notas(int valor){
+
+}
+*/
+void saca_conta(){
+    int i, j, check;
+    char opcao, agencia[MAX_AGENCIA], numero[MAX_NUMERO], busca_conta[MAX_AGENCIA+MAX_NUMERO], cliente[MAX_CODIGO];
+    float valor;
+
+    TRANSACAO saque;
+
+    while(1){
+        check=1;
+        printf("\n================== Saque de conta ==================\n");
+        printf("\nInforme a agencia da conta que deseja sacar: ");
+        scanf("%s%*c", &agencia);
+        printf("\nInforme o numero da conta que deseja sacar: ");
+        scanf("%s%*c", &numero);
+
+        strcpy(busca_conta, agencia);
+        strcat(busca_conta, numero);
+        j=encontra_valor(2, busca_conta, 1);
+
+        if(j!=-1){
+            strcpy(cliente, v_contas[j].cliente);
+            i=encontra_valor(1, cliente, 1);
+
+            printf("\n------------- Conta encontrada! ---------------");
+            printf("\nCliente: %s", v_contas[j].cliente);
+            printf("\nAgencia: %s", v_contas[j].agencia);
+            printf("\nNumero: %s", v_contas[j].numero);
+            printf("\nSaldo: %.2f\n", v_contas[j].saldo);
+            printf("\n----------- Dados do cliente dono -------------");
+            printf("\nCodigo: %s", v_clientes[i].codigo);
+            printf("\nNome: %s", v_clientes[i].nome);
+            printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+            printf("\nTelefone: %s", v_clientes[i].telefone);
+            printf("\nEndereco: %s", v_clientes[i].endereco);
+            printf("\n-----------------------------------------------\n");
+
+            while(check){
+                printf("\nInforme o valor que deseja sacar (0 para cancelar): ");
+                scanf("%f%*c", &valor);
+                fflush(stdin);
+
+                if(valor==0){
+                    printf("\nRetornando ao inicio\n");
+                    check=0;
+                }
+                else if(valor>v_contas[j].saldo){
+                    printf("\n*!* O saldo da conta e insuficiente para este saque! *!*\n");
+                    printf("\nDeseja tentar novamente? (s/n): ");
+                    scanf("%c%*c", &opcao);
+                    if(opcao=='s' || opcao=='S'){
+                        break;
+                    }
+                    else if(opcao=='n' || opcao=='N'){
+                        printf("\nRetornando ao menu\n");
+                        return;
+                    }
+                    else{
+                        printf("\n*!* Comando invalido! *!*\n");
+                    }
+                }
+                else{
+                    printf("\nInforme uma descricao para este saque:\n\n");
+                    scanf("%[^\n]%*c", saque.descricao);
+                    fflush(stdin);
+                    strcpy(saque.tipo, "DEBITO");
+                    strcpy(saque.conta, busca_conta);
+                    strcpy(saque.data, data_hoje);
+                    saque.valor=valor;
+
+                    v_transacoes[num_transacoes]=saque;
+
+                    if(!strcmp(saque.conta, v_transacoes[num_transacoes].conta) && saque.valor==v_transacoes[num_transacoes].valor){
+                        num_transacoes++;
+                        printf("\n-------------- Saque realizado! ---------------\n");
+                        //conta_notas((int)valor);
+                        return;
+                    }
+                    else{
+                        printf("\n*!* Ocorreu um erro ao realizar a operacao! *!*\n");
+                        check=0;
+                    }
+                }
+            }
+        }
+        else{
+            printf("\n*!* Nao existe uma conta cadastrada com essa agencia e numero! *!*\n");
+            while(1){
+                printf("\nDeseja tentar novamente? (s/n): ");
+                scanf("%c%*c", &opcao);
+                if(opcao=='s' || opcao=='S'){
+                    break;
+                }
+                else if(opcao=='n' || opcao=='N'){
+                    printf("\nRetornando ao menu\n");
+                    return;
+                }
+                else{
+                    printf("\n*!* Comando invalido! *!*\n");
+                }
             }
         }
     }
