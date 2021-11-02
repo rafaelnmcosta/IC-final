@@ -384,10 +384,10 @@ void menu_conta(){
                 deposita_conta();
             break;
             case 'T':
-                //transfere_conta();
+                transfere_conta();
             break;
             case 't':
-                //transfere_conta();
+                transfere_conta();
             break;
             case 'E':
                 //extrato_conta();
@@ -1379,6 +1379,185 @@ void deposita_conta(){
                     else{
                         printf("\n*!* Ocorreu um erro ao realizar a operacao! *!*\n");
                         check=0;
+                    }
+                }
+            }
+        }
+        else{
+            printf("\n*!* Nao existe uma conta cadastrada com essa agencia e numero! *!*\n");
+            while(1){
+                printf("\nDeseja tentar novamente? (s/n): ");
+                scanf("%c%*c", &opcao);
+                if(opcao=='s' || opcao=='S'){
+                    break;
+                }
+                else if(opcao=='n' || opcao=='N'){
+                    printf("\nRetornando ao menu\n");
+                    return;
+                }
+                else{
+                    printf("\n*!* Comando invalido! *!*\n");
+                }
+            }
+        }
+    }
+}
+
+void transfere_conta(){
+    int i, j, a, b, check1, check2;
+    char opcao, agencia[MAX_AGENCIA], numero[MAX_NUMERO], conta[MAX_AGENCIA+MAX_NUMERO], busca_conta[MAX_AGENCIA+MAX_NUMERO], cliente[MAX_CODIGO], descricao[MAX_DESCRICAO];
+    float valor;
+
+    TRANSACAO saque;
+    TRANSACAO deposito;
+
+    while(1){
+        check1=1;
+        check2=1;
+        printf("\n=================== Transferencia ====================\n");
+        printf("\nInforme a agencia da conta de onde o dinheiro saira: ");
+        scanf("%s%*c", &agencia);
+        printf("\nInforme o numero da conta de onde o dinheiro saira: ");
+        scanf("%s%*c", &numero);
+
+        strcpy(busca_conta, agencia);
+        strcat(busca_conta, numero);
+        j=encontra_valor(2, busca_conta, 1);
+
+        if(j!=-1){
+            strcpy(cliente, v_contas[j].cliente);
+            i=encontra_valor(1, cliente, 1);
+
+            printf("\n------------- Conta encontrada! ---------------");
+            printf("\nCliente: %s", v_contas[j].cliente);
+            printf("\nAgencia: %s", v_contas[j].agencia);
+            printf("\nNumero: %s", v_contas[j].numero);
+            printf("\nSaldo: %.2f\n", v_contas[j].saldo);
+            printf("\n----------- Dados do cliente dono -------------");
+            printf("\nCodigo: %s", v_clientes[i].codigo);
+            printf("\nNome: %s", v_clientes[i].nome);
+            printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+            printf("\nTelefone: %s", v_clientes[i].telefone);
+            printf("\nEndereco: %s", v_clientes[i].endereco);
+            printf("\n-----------------------------------------------\n");
+
+            while(check1){
+                printf("\nInforme a agencia da conta que rebera a transferencia: ");
+                scanf("%s%*c", &agencia);
+                printf("\nInforme o numero da conta que rebera a transferencia: ");
+                scanf("%s%*c", &numero);
+
+                strcpy(busca_conta, agencia);
+                strcat(busca_conta, numero);
+                b=encontra_valor(2, busca_conta, 1);
+
+                if(b!=-1){
+                    strcpy(cliente, v_contas[b].cliente);
+                    a=encontra_valor(1, cliente, 1);
+
+                    printf("\n------------- Conta encontrada! ---------------");
+                    printf("\nCliente: %s", v_contas[b].cliente);
+                    printf("\nAgencia: %s", v_contas[b].agencia);
+                    printf("\nNumero: %s", v_contas[b].numero);
+                    printf("\nSaldo: %.2f\n", v_contas[b].saldo);
+                    printf("\n----------- Dados do cliente dono -------------");
+                    printf("\nCodigo: %s", v_clientes[a].codigo);
+                    printf("\nNome: %s", v_clientes[a].nome);
+                    printf("\nCPF/CNPJ: %s", v_clientes[a].cpf_cnpj);
+                    printf("\nTelefone: %s", v_clientes[a].telefone);
+                    printf("\nEndereco: %s", v_clientes[a].endereco);
+                    printf("\n-----------------------------------------------\n");
+                    check1=0;
+                }
+                else{
+                    printf("\n*!* Nao existe uma conta cadastrada com essa agencia e numero! *!*\n");
+                    while(1){
+                        printf("\nDeseja tentar novamente? (s/n): ");
+                        scanf("%c%*c", &opcao);
+                        if(opcao=='s' || opcao=='S'){
+                            break;
+                        }
+                        else if(opcao=='n' || opcao=='N'){
+                            printf("\nRetornando ao menu\n");
+                            return;
+                        }
+                        else{
+                            printf("\n*!* Comando invalido! *!*\n");
+                        }
+                    }
+                }
+            }
+            while(check2){
+                printf("\nInforme o valor que deseja transferir (0 para cancelar): ");
+                scanf("%f%*c", &valor);
+                fflush(stdin);
+
+                if(valor==0){
+                    printf("\nRetornando ao menu\n");
+                    return;
+                }
+                else if(valor>v_contas[j].saldo){
+                    printf("\n*!* O saldo da conta e insuficiente para esta transferencia! *!*\n");
+                    while(1){
+                        printf("\nDeseja tentar novamente? (s/n): ");
+                        scanf("%c%*c", &opcao);
+                        if(opcao=='s' || opcao=='S'){
+                            break;
+                        }
+                        else if(opcao=='n' || opcao=='N'){
+                            printf("\nRetornando ao menu\n");
+                            return;
+                        }
+                        else{
+                            printf("\n*!* Comando invalido! *!*\n");
+                        }
+                    }
+                }
+                else{
+                    printf("\nInforme uma descricao para esta transferencia:\n\n");
+                    scanf("%[^\n]%*c", descricao);
+                    fflush(stdin);
+
+                    strcpy(conta, v_contas[j].agencia);
+                    strcat(conta, v_contas[j].numero);
+
+                    strcpy(saque.tipo, "DEBITO");
+                    strcpy(saque.conta, conta);
+                    strcpy(saque.data, data_hoje);
+                    strcpy(saque.descricao, descricao);
+                    saque.valor=valor;
+
+                    v_transacoes[num_transacoes]=saque;
+
+                    if(!strcmp(saque.conta, v_transacoes[num_transacoes].conta) && saque.valor==v_transacoes[num_transacoes].valor){
+                        v_contas[j].saldo -= valor;
+                        num_transacoes++;
+
+                        strcpy(conta, v_contas[b].agencia);
+                        strcat(conta, v_contas[b].numero);
+
+                        strcpy(deposito.tipo, "CREDITO");
+                        strcpy(deposito.conta, conta);
+                        strcpy(deposito.data, data_hoje);
+                        strcpy(deposito.descricao, descricao);
+                        deposito.valor=valor;
+
+                        v_transacoes[num_transacoes]=deposito;
+
+                        if(!strcmp(deposito.conta, v_transacoes[num_transacoes].conta) && deposito.valor==v_transacoes[num_transacoes].valor){
+                            v_contas[b].saldo += valor;
+                            num_transacoes++;
+                            printf("\n----------- Transferencia realizada! -------------\n");
+                            return;
+                        }
+                        else{
+                            printf("\n*!* Ocorreu um erro ao realizar a operacao! *!*\n");
+                            check2=0;
+                        }
+                    }
+                    else{
+                        printf("\n*!* Ocorreu um erro ao realizar a operacao! *!*\n");
+                        check2=0;
                     }
                 }
             }
