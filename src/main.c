@@ -313,10 +313,10 @@ void menu_conta(){
                 lista_conta();
             break;
             case 'C':
-                //cadastra_conta_p_cliente();
+                cadastra_conta_p_cliente();
             break;
             case 'c':
-                //cadastra_conta_p_cliente();
+                cadastra_conta_p_cliente();
             break;
             case 'L':
                 //lista_conta_p_cliente();
@@ -650,8 +650,8 @@ void busca_cliente(){
             break;
             default:
                 printf("\n*!* Comando invalido! *!*\n");
+                fflush(stdin);
                 check=0;
-                scanf("%*c");
             break;
         }
         if(i!=-1 && check){
@@ -721,8 +721,8 @@ void atualiza_cliente(){
             break;
             default:
                 printf("\n*!* Comando invalido! *!*\n");
+                fflush(stdin);
                 check1=0;
-                scanf("%*c");
             break;
         }
 
@@ -854,8 +854,8 @@ void exclui_cliente(){
             break;
             default:
                 printf("\n*!* Comando invalido! *!*\n");
+                fflush(stdin);
                 check=0;
-                scanf("%*c");
             break;
         }
 
@@ -931,5 +931,141 @@ void lista_conta(){
         }
         printf("\n----------------- Fim da lista --------------------\n");
         printf("\nRetornando ao menu\n");
+    }
+}
+
+void cadastra_conta_p_cliente(){
+    int i, j, opcao1, check1, check2, check3;
+    char opcao2, opcao3, busca_cliente[MAX_CPF_CNPJ], busca_conta[MAX_AGENCIA+MAX_NUMERO];
+
+    CONTA nova_conta;
+
+    while(1){
+        check1=1;
+        check2=1;
+        check3=1;
+        printf("\n=============== Cadastro de conta ===================\n");
+        printf("Informe o metodo que deseja usar para buscar o cliente que sera dono da conta:\n");
+        printf(" 1 - Busca por codigo;\n 2 - Busca por CPF/CNPJ;\n 0 - Retornar ao menu;\n");
+        printf("\nEscolha: ");
+        scanf("%d%*c", &opcao1);
+
+        switch(opcao1){
+            case 0:
+                printf("\nRetornando ao menu\n");
+                return;
+            break;
+            case 1:
+                printf("\nInforme o codigo do cliente a ser buscado: ");
+                scanf("%[^\n]%*c", &busca_cliente);
+                i=encontra_valor(1, busca_cliente, opcao1);
+            break;
+            case 2:
+                printf("\nInforme o CPF/CNPJ do cliente a ser buscado: ");
+                scanf("%[^\n]%*c", &busca_cliente);
+                i=encontra_valor(1, busca_cliente, opcao1);
+            default:
+                printf("\n*!* Comando invalido! *!*\n");
+                fflush(stdin);
+                check1=0;
+            break;
+        }
+        if(i!=-1 && check1){
+            
+            while(check2){
+                printf("\n------------- Cliente encontrado! ---------------");
+                printf("\nCodigo: %s", v_clientes[i].codigo);
+                printf("\nNome: %s", v_clientes[i].nome);
+                printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+                printf("\nTelefone: %s", v_clientes[i].telefone);
+                printf("\nEndereco: %s\n", v_clientes[i].endereco);
+                printf("---------------------------------------------------");           
+                printf("\nDeseja cadastrar uma nova conta para esse cliente? (s/n): ");
+                scanf("%c%*c", &opcao2);
+
+                if(opcao2=='s' || opcao2=='S'){
+                    printf("\nInforme a agencia da nova conta (3 digitos s/ espaco): ");
+                    scanf("%s", &nova_conta.agencia);
+                    printf("\nInforme o numero da nova conta (5 digitos s/ espaco): ");
+                    scanf("%s", &nova_conta.numero);
+
+                    if(strlen(nova_conta.agencia)!=3){
+                        printf("\n*!* A agencia deve possuir 3 digitos exatos! *!*\n");
+                        fflush(stdin);
+                    }
+                    else if(strlen(nova_conta.numero)!=5){
+                        printf("\n*!* O numero da conta deve possuir 5 digitos exatos! *!*\n");
+                        fflush(stdin);
+                    }
+                    else{
+                        strcpy(busca_conta, nova_conta.agencia);
+                        strcat(busca_conta, nova_conta.numero);
+
+                        j=encontra_valor(2, busca_cliente, 1);
+
+                        if(j!=-1){
+                            printf("\n*!* Ja existe uma conta cadastrada com essa agencia e numero! *!*\n");
+                        }
+                        else{
+                            strcpy(nova_conta.cliente, v_clientes[i].codigo);
+                            nova_conta.saldo = 0.0;
+
+                            printf("\nPor favor confirme se os dados da conta estao corretos:\n");
+                            printf("\nCliente: %s", nova_conta.cliente);
+                            printf("\nAgencia: %s", nova_conta.agencia);
+                            printf("\nNumero: %s", nova_conta.numero);
+                            printf("\nSaldo: %.2f\n", nova_conta.saldo);
+
+                            while(check3){
+                                printf("Deseja salvar a conta assim? (s/n): ");
+                                scanf("%c%*c", &opcao3);
+
+                                if(opcao2=='s' || opcao2=='S'){
+                                    v_contas[num_contas]=nova_conta;
+
+                                    if(!strcmp(v_contas[num_contas].cliente, nova_conta.cliente)){
+                                        printf("\n----------- Conta cadastrada com sucesso! ------------\n");
+                                        printf("\nRetornando ao menu\n");
+                                        num_contas++;
+                                        scanf("%*c");
+                                        return;
+                                    }
+                                    else{
+                                        printf("*!* Erro ao cadastrar conta! *!*");
+                                        check2=0;
+                                        check3=0;
+                                    }
+                                }
+                                else if(opcao2=='n' || opcao2=='N'){
+                                    printf("\nRetornando ao inicio\n");
+                                    check2=0;
+                                    check3=0;
+                                }
+                                else{
+                                    printf("\n*!* Comando invalido! *!*\n");
+                                }
+                            }
+                        }
+                    }
+                }
+                else if(opcao2=='n' || opcao2=='N'){
+                    printf("\nRetornando ao inicio\n");
+                    check2=0;
+                }
+                else{
+                    printf("\n*!* Comando invalido! *!*\n");
+                }
+            }
+        }
+        else{
+            switch(opcao1){
+                case 1:
+                    printf("\n*!* Nao existe cliente cadastrado com esse codigo! *!*\n");
+                break;
+                case 2:
+                    printf("\n*!* Nao existe cliente cadastrado com esse CPF/CNPJ! *!*\n");
+                break;
+            }
+        }
     }
 }
