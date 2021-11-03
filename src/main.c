@@ -73,6 +73,7 @@ int encontra_valor(int, char*, int);
 int ordem_alfabetica(char*, char*);
 void organiza_vetor(int);
 void conta_notas(int);
+void calcula_data(int, int*, int*, int*);
 
 void cadastra_cliente();
 void lista_cliente();
@@ -390,10 +391,10 @@ void menu_conta(){
                 transfere_conta();
             break;
             case 'E':
-                //extrato_conta();
+                extrato_conta();
             break;
             case 'e':
-                //extrato_conta();
+                extrato_conta();
             break;
             case 'S':
                 printf("\nRetornando ao menu principal\n");
@@ -1559,6 +1560,227 @@ void transfere_conta(){
                         printf("\n*!* Ocorreu um erro ao realizar a operacao! *!*\n");
                         check2=0;
                     }
+                }
+            }
+        }
+        else{
+            printf("\n*!* Nao existe uma conta cadastrada com essa agencia e numero! *!*\n");
+            while(1){
+                printf("\nDeseja tentar novamente? (s/n): ");
+                scanf("%c%*c", &opcao);
+                if(opcao=='s' || opcao=='S'){
+                    break;
+                }
+                else if(opcao=='n' || opcao=='N'){
+                    printf("\nRetornando ao menu\n");
+                    return;
+                }
+                else{
+                    printf("\n*!* Comando invalido! *!*\n");
+                }
+            }
+        }
+    }
+}
+
+void calcula_data(int total_dias, int * dia_fim, int * mes_fim, int * ano_fim){
+    
+    char c_dia[3], c_mes[3], c_ano[5];
+    int i_dia, i_mes, i_ano, cont;
+
+    c_dia[0]=data_hoje[0];
+    c_dia[1]=data_hoje[1];
+    c_dia[2]=NULL;
+
+    c_mes[0]=data_hoje[3]; 
+    c_mes[1]=data_hoje[4];
+    c_mes[2]=NULL;
+
+    c_ano[0]=data_hoje[6];
+    c_ano[1]=data_hoje[7];
+    c_ano[2]=data_hoje[8];
+    c_ano[3]=data_hoje[9];
+    c_ano[4]=NULL;
+
+    i_dia=atoi(c_dia);
+    i_mes=atoi(c_mes);
+    i_ano=atoi(c_ano);
+
+    for(cont=0; cont<total_dias; cont++){
+        i_dia--;
+        if(i_dia==0){
+            switch(i_mes){
+                case 1:
+                    i_dia=31;
+                    i_mes=12;
+                    i_ano--;
+                //31
+                break;
+                case 2:
+                    i_dia=31;
+                    i_mes=1;
+                //28
+                break;
+                case 3:
+                    i_dia=28;
+                    i_mes=2;
+                //31
+                break;
+                case 4:
+                    i_dia=31;
+                    i_mes=3;
+                //30
+                break;
+                case 5:
+                    i_dia=30;
+                    i_mes=4;
+                //31
+                break;
+                case 6:
+                    i_dia=31;
+                    i_mes=5;
+                //30
+                break;
+                case 7:
+                    i_dia=30;
+                    i_mes=6;
+                //31
+                break;
+                case 8:
+                    i_dia=31;
+                    i_mes=7;
+                //31
+                break;
+                case 9:
+                    i_dia=31;
+                    i_mes=8;
+                //30
+                break;
+                case 10:
+                    i_dia=30;
+                    i_mes=9;
+                //31
+                break;
+                case 11:
+                    i_dia=31;
+                    i_mes=10;
+                //30
+                break;
+                case 12:
+                    i_dia=30;
+                    i_mes=11;
+                //31
+                break;
+                default:
+                    printf("\nErro\n");
+                break;
+            }
+        }
+    }
+
+    *dia_fim = i_dia;
+    *mes_fim = i_mes;
+    *ano_fim = i_ano;
+}
+
+void extrato_conta(){
+    int i, j, check, total_dias, dia_fim, mes_fim, ano_fim, cont, imprime;
+    char opcao, agencia[MAX_AGENCIA], numero[MAX_NUMERO], busca_conta[MAX_AGENCIA+MAX_NUMERO], cliente[MAX_CODIGO];
+    char aux_dia[3], aux_mes[3], aux_ano[5];
+    int i_dia, i_mes, i_ano;
+
+    TRANSACAO deposito;
+
+    while(1){
+        check=1;
+        printf("\n================ Extrato de conta ================\n");
+        printf("\nInforme a agencia da conta que deseja ver o extrato: ");
+        scanf("%s%*c", &agencia);
+        printf("\nInforme o numero da conta que deseja ver o extrato: ");
+        scanf("%s%*c", &numero);
+
+        strcpy(busca_conta, agencia);
+        strcat(busca_conta, numero);
+        j=encontra_valor(2, busca_conta, 1);
+
+        if(j!=-1){
+            strcpy(cliente, v_contas[j].cliente);
+            i=encontra_valor(1, cliente, 1);
+
+            printf("\n------------- Conta encontrada! ---------------");
+            printf("\nCliente: %s", v_contas[j].cliente);
+            printf("\nAgencia: %s", v_contas[j].agencia);
+            printf("\nNumero: %s", v_contas[j].numero);
+            printf("\nSaldo: %.2f\n", v_contas[j].saldo);
+            printf("\n----------- Dados do cliente dono -------------");
+            printf("\nCodigo: %s", v_clientes[i].codigo);
+            printf("\nNome: %s", v_clientes[i].nome);
+            printf("\nCPF/CNPJ: %s", v_clientes[i].cpf_cnpj);
+            printf("\nTelefone: %s", v_clientes[i].telefone);
+            printf("\nEndereco: %s", v_clientes[i].endereco);
+            printf("\n-----------------------------------------------\n");
+
+            while(check){
+                printf("\nInforme quantos dias de transacoes deseja ver no extrato (0 para cancelar): ");
+                scanf("%d%*c", &total_dias);
+                fflush(stdin);
+
+                if(total_dias==0){
+                    printf("\nRetornando ao inicio\n");
+                    check=0;
+                }
+                else{
+                    printf("\n------------------ Extrato -------------------\n");
+
+                    calcula_data(total_dias, &dia_fim, &mes_fim, &ano_fim);
+
+                    for(cont=num_transacoes; cont>=0; cont--){
+                        imprime=0;
+                        if(v_transacoes[cont].conta[0]!=NULL){
+                            aux_dia[0]=v_transacoes[cont].data[0];
+                            aux_dia[1]=v_transacoes[cont].data[1];
+                            aux_dia[2]=NULL;
+
+                            aux_mes[0]=v_transacoes[cont].data[3]; 
+                            aux_mes[1]=v_transacoes[cont].data[4];
+                            aux_mes[2]=NULL;
+
+                            aux_ano[0]=v_transacoes[cont].data[6];
+                            aux_ano[1]=v_transacoes[cont].data[7];
+                            aux_ano[2]=v_transacoes[cont].data[8];
+                            aux_ano[3]=v_transacoes[cont].data[9];
+                            aux_ano[4]=NULL;
+
+                            i_dia=atoi(aux_dia);
+                            i_mes=atoi(aux_mes);
+                            i_ano=atoi(aux_ano);
+
+                            if(!strcmp(busca_conta, v_transacoes[cont].conta)){
+                                if(i_ano>=ano_fim){
+                                    if(i_mes>=mes_fim){
+                                        if(i_dia>=dia_fim){
+                                            imprime=1;
+                                        }
+                                        else if(i_mes>mes_fim){
+                                            imprime=1;
+                                        }
+                                    }
+                                    else if(i_ano>ano_fim){
+                                        imprime=1;
+                                    }
+                                }
+                            }
+                            if(imprime){
+                                printf("\nTipo: %s\n", v_transacoes[cont].tipo);
+                                printf("valor: %.2f\n", v_transacoes[cont].valor);
+                                printf("Data: %s\n", v_transacoes[cont].data);
+                                printf("Descricao: %s\n", v_transacoes[cont].descricao);
+                                printf("\n-----------------------------------------------\n");
+                            }
+                        }
+                    }
+                    printf("\nFim do extrato! Retornando ao menu.\n");
+                    return;
                 }
             }
         }

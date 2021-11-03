@@ -5,12 +5,12 @@ DEBITO
 Teste do primeiro saque
 CREDITO
 20.00
-02/11/2021
+29/10/2021
 12378780
 Teste do primeiro deposito
 DEBITO
 10.00
-02/11/2021
+01/11/2021
 12378780
 Teste da primeira transferencia
 CREDITO
@@ -18,3 +18,8 @@ CREDITO
 02/11/2021
 12355555
 Teste da primeira transferencia
+CREDITO
+100.00
+02/11/2021
+12378780
+Novo deposito
