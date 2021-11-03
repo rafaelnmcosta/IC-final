@@ -508,40 +508,33 @@ int ordem_alfabetica(char * comp_1, char * comp_2){
 }
 */
 
-/*
 void organiza_vetor(int tipo){
-    //
+    /*
         Tipos de vetores a organizar:
         clientes=1  : organiza o vetor de clientes por ordem alfabetica;
         contas=2    : organiza o vetor de contas de acordo com a ordem alfabetica de clientes;
-        transacoes=3: organiza o vetor de transacoes de acordo com a data;
-    //
-    CLIENTE * clientes_aux;
-    CONTA * contas_aux;
-    TRANSACAO * transacoes_aux;
-
-    CLIENTE * clientes_ord;
-    CONTA * contas_ord;
-    TRANSACAO * transacoes_ord;
-
-    int i, j;
-
-    clientes_aux = (CLIENTE *) calloc(MAX_CLIENTES, sizeof(CLIENTE));
-    contas_aux = (CONTA *) calloc(MAX_CONTAS, sizeof(CONTA));
-    transacoes_aux = (TRANSACAO *) calloc(MAX_TRANSACOES, sizeof(TRANSACAO));
-
-    clientes_ord = (CLIENTE *) calloc(MAX_CLIENTES, sizeof(CLIENTE));
-    contas_ord = (CONTA *) calloc(MAX_CONTAS, sizeof(CONTA));
-    transacoes_ord = (TRANSACAO *) calloc(MAX_TRANSACOES, sizeof(TRANSACAO));
+    */
+    int i, j, comp, pos_menor;
+    char menor[MAX_NOME];
+    CLIENTE aux_cli;
 
     switch(tipo){
         case 1:
-            clientes_aux = v_clientes;
-            for(i=0; i<MAX_CLIENTES; i++){
-                for(j=0; j<MAX_CLIENTES; j++){
-                    if(ordem_alfabetica(clientes_aux[i], clientes_aux[j])){
-
+            for(i=0; i<num_clientes; i++){
+                if(v_clientes[i].codigo[0]!=NULL){
+                    strcpy(menor, v_clientes[i].nome);
+                    pos_menor=i;
+                    for(j=i; j<num_clientes; j++){
+                        //printf("-menor:%s-\n", menor);
+                        comp = strcmp(menor, v_clientes[j].nome);
+                        if(comp>0){
+                            strcpy(menor, v_clientes[j].nome);
+                            pos_menor=j;
+                        }
                     }
+                    aux_cli = v_clientes[pos_menor];
+                    v_clientes[pos_menor]=v_clientes[i];
+                    v_clientes[i]=aux_cli;
                 }
             }
         break;
@@ -553,7 +546,6 @@ void organiza_vetor(int tipo){
         break;
     }
 }
-*/
 
 void cadastra_cliente(){
 
@@ -606,9 +598,10 @@ void cadastra_cliente(){
                     printf("\n*!* Erro ao cadastrar cliente! *!*\n");
                 }
                 else{
+                    num_clientes++;
+                    organiza_vetor(1);
                     printf("\n--------- Cliente cadastrado com sucesso! -----------\n");
                     printf("\nRetornando ao menu\n");
-                    num_clientes++;
                     return;
                 }
             }
@@ -652,7 +645,7 @@ void lista_cliente(){
     }
     else{
         printf("\n============= Lista de clientes ==================\n");    
-        for(i=0; i<MAX_CLIENTES; i++){
+        for(i=0; i<num_clientes; i++){
             if(v_clientes[i].codigo[0]!=NULL){
                 printf("\nCodigo: %s", v_clientes[i].codigo);
                 printf("\nNome: %s", v_clientes[i].nome);
@@ -833,6 +826,7 @@ void atualiza_cliente(){
                             check1=0;
                         }
                         else{
+                            organiza_vetor(1);
                             printf("\n-------- Cliente atualizado com sucesso! -----------\n");
                             printf("\nRetornando ao menu\n");
                             return;
@@ -931,6 +925,7 @@ void exclui_cliente(){
                     v_clientes[i].cpf_cnpj[0]=NULL;
 
                     if(v_clientes[i].codigo[0]==NULL && v_clientes[i].cpf_cnpj[0]==NULL){
+                        organiza_vetor(1);
                         printf("\n------------- Cliente excluido! ---------------\n");
                         printf("\nRetornando ao menu\n");
                         return;
@@ -1416,9 +1411,9 @@ void transfere_conta(){
         check1=1;
         check2=1;
         printf("\n=================== Transferencia ====================\n");
-        printf("\nInforme a agencia da conta de onde o dinheiro saira: ");
+        printf("\nInforme a agencia da conta de saida: ");
         scanf("%s%*c", &agencia);
-        printf("\nInforme o numero da conta de onde o dinheiro saira: ");
+        printf("\nInforme o numero da conta de saida: ");
         scanf("%s%*c", &numero);
 
         strcpy(busca_conta, agencia);
@@ -1443,9 +1438,9 @@ void transfere_conta(){
             printf("\n-----------------------------------------------\n");
 
             while(check1){
-                printf("\nInforme a agencia da conta que rebera a transferencia: ");
+                printf("\nInforme a agencia da conta de entrada: ");
                 scanf("%s%*c", &agencia);
-                printf("\nInforme o numero da conta que rebera a transferencia: ");
+                printf("\nInforme o numero da conta de entrada: ");
                 scanf("%s%*c", &numero);
 
                 strcpy(busca_conta, agencia);
