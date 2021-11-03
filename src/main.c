@@ -64,7 +64,7 @@ typedef struct transacao{
 
 void gera_data();
 void boot();
-void quit();
+void save();
 
 void menu_principal();
 void menu_cliente();
@@ -96,7 +96,7 @@ int main(){
 
     menu_principal();
 
-    quit();
+    save();
 
     return 0;
 }
@@ -187,9 +187,12 @@ void boot(){
         }
     }
     fclose(tr_db);
+
+    organiza_vetor(1);
+    organiza_vetor(2);
 }
 
-void quit(){
+void save(){
 
     CLIENTE cli_atual;
     CONTA ct_atual;
@@ -333,6 +336,7 @@ void menu_cliente(){
                 printf("\n*!* Comando invalido! *!*\n");
             break;
         }
+        save();
     }
 }
 
@@ -408,6 +412,7 @@ void menu_conta(){
                 printf("\n*!* Comando invalido! *!*\n");
             break;
         }
+        save();
     }
 }
 
