@@ -32,6 +32,7 @@ typedef struct conta{
     char agencia[MAX_AGENCIA];
     char numero[MAX_NUMERO];
     char cliente[MAX_CODIGO]; //codigo do cliente;
+    char nome_cliente[MAX_NOME];
     float saldo;
 } CONTA;
 
@@ -167,7 +168,7 @@ void boot(){
     if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CONTAS *!*\n     Arquivo indisponivel ou inexistente!\n --Um novo arquivo sera criado quando dados forem inseridos no programa--\n\n");
     else{
         i=0;
-        while(fscanf(ct_db, "%s %s %s %f", &ct_atual.agencia, &ct_atual.numero, &ct_atual.cliente, &ct_atual.saldo)!=EOF){
+        while(fscanf(ct_db, "%s %s %s %[^\n] %f", &ct_atual.agencia, &ct_atual.numero, &ct_atual.cliente, &ct_atual.nome_cliente, &ct_atual.saldo)!=EOF){
             v_contas[i]=ct_atual;
             num_contas++;
             i++;
@@ -210,19 +211,19 @@ void quit(){
     fclose(cli_db);
 
     ct_db = fopen("dados_contas.txt", "w");
-    if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel!\n\n");
+    if(ct_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CONTAS *!*\n     Arquivo indisponivel!\n\n");
     else{
         for(i=0; i<num_contas; i++){
             if(v_contas[i].cliente[0]!=NULL){
                 ct_atual = v_contas[i];
-                fprintf(cli_db, "%s\n%s\n%s\n%.2f\n", ct_atual.agencia, ct_atual.numero, ct_atual.cliente, ct_atual.saldo);
+                fprintf(cli_db, "%s\n%s\n%s\n%s\n%.2f\n", ct_atual.agencia, ct_atual.numero, ct_atual.cliente, ct_atual.nome_cliente, ct_atual.saldo);
             }
         }
     }
     fclose(ct_db);
 
     tr_db = fopen("dados_transacoes.txt", "w");
-    if(tr_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE CLIENTES *!*\n     Arquivo indisponivel!\n\n");
+    if(tr_db == NULL) printf("*!* ERRO AO ABRIR BASE DE DADOS DE TRANSACOES *!*\n     Arquivo indisponivel!\n\n");
     else{
         for(i=0; i<num_transacoes; i++){
             if(v_transacoes[i].data[0]!=NULL){
@@ -502,21 +503,17 @@ int encontra_valor(int tipo, char* busca, int categoria){
     }
 }
 
-/*
-int ordem_alfabetica(char * comp_1, char * comp_2){
-
-}
-*/
-
 void organiza_vetor(int tipo){
     /*
         Tipos de vetores a organizar:
         clientes=1  : organiza o vetor de clientes por ordem alfabetica;
         contas=2    : organiza o vetor de contas de acordo com a ordem alfabetica de clientes;
     */
-    int i, j, comp, pos_menor;
+    int i, j, comp, pos_menor, pos_cli_atual;
     char menor[MAX_NOME];
+    float maior_saldo;
     CLIENTE aux_cli;
+    CONTA aux_conta;
 
     switch(tipo){
         case 1:
@@ -525,7 +522,6 @@ void organiza_vetor(int tipo){
                     strcpy(menor, v_clientes[i].nome);
                     pos_menor=i;
                     for(j=i; j<num_clientes; j++){
-                        //printf("-menor:%s-\n", menor);
                         comp = strcmp(menor, v_clientes[j].nome);
                         if(comp>0){
                             strcpy(menor, v_clientes[j].nome);
@@ -539,10 +535,29 @@ void organiza_vetor(int tipo){
             }
         break;
         case 2:
-
-        break;
-        case 3:
-
+            for(i=0; i<num_contas; i++){
+                if(v_contas[i].cliente[0]!=NULL){
+                    strcpy(menor, v_contas[i].nome_cliente);
+                    pos_menor=i;
+                    maior_saldo=v_contas[i].saldo;
+                    for(j=i; j<num_contas; j++){
+                        comp = strcmp(menor, v_contas[j].nome_cliente);
+                        if(comp>0){
+                            strcpy(menor, v_contas[j].nome_cliente);
+                            pos_menor=j;
+                        }
+                        else if(comp==0){
+                            if(maior_saldo<v_contas[j].saldo){
+                                maior_saldo=v_contas[j].saldo;
+                                pos_menor=j;
+                            }
+                        }
+                    }
+                    aux_conta = v_contas[pos_menor];
+                    v_contas[pos_menor]=v_contas[i];
+                    v_contas[i]=aux_conta;
+                }
+            }
         break;
     }
 }
@@ -970,13 +985,23 @@ void lista_conta(){
         printf("\n*!* Nenhuma conta cadastrada! *!*\n");
     }
     else{
+        organiza_vetor(2);
         printf("\n============= Lista de contas ==================\n");    
         for(i=0; i<num_contas; i++){
             if(v_contas[i].cliente[0]!=NULL){
-                printf("\nCliente: %s", v_contas[i].cliente);
-                printf("\nAgencia: %s", v_contas[i].agencia);
-                printf("\nNumero: %s", v_contas[i].numero);
-                printf("\nSaldo: %.2f\n", v_contas[i].saldo);
+                if(strcmp(v_contas[i].cliente, v_contas[i-1].cliente)){
+                    printf("------------------------------------------------");      
+                    printf("\nCodigo do cliente: %s", v_contas[i].cliente);
+                    printf("\nCliente: %s\n", v_contas[i].nome_cliente);
+                    printf("\nAgencia: %s", v_contas[i].agencia);
+                    printf("\nNumero: %s", v_contas[i].numero);
+                    printf("\nSaldo: %.2f\n", v_contas[i].saldo);
+                }
+                else{
+                    printf("\nAgencia: %s", v_contas[i].agencia);
+                    printf("\nNumero: %s", v_contas[i].numero);
+                    printf("\nSaldo: %.2f\n", v_contas[i].saldo);
+                }
             }
         }
         printf("\n----------------- Fim da lista --------------------\n");
@@ -1059,10 +1084,11 @@ void cadastra_conta_p_cliente(){
                         }
                         else{
                             strcpy(nova_conta.cliente, v_clientes[i].codigo);
+                            strcpy(nova_conta.nome_cliente, v_clientes[i].nome);
                             nova_conta.saldo = 0.0;
 
                             printf("\nPor favor confirme se os dados da conta estao corretos:\n");
-                            printf("\nCliente: %s", nova_conta.cliente);
+                            printf("\nCliente: %s", nova_conta.nome_cliente);
                             printf("\nAgencia: %s", nova_conta.agencia);
                             printf("\nNumero: %s", nova_conta.numero);
                             printf("\nSaldo: %.2f\n", nova_conta.saldo);
@@ -1078,6 +1104,7 @@ void cadastra_conta_p_cliente(){
                                         printf("\n----------- Conta cadastrada com sucesso! ------------\n");
                                         printf("\nRetornando ao menu\n");
                                         num_contas++;
+                                        organiza_vetor(2);
                                         scanf("%*c");
                                         return;
                                     }
@@ -1122,6 +1149,8 @@ void cadastra_conta_p_cliente(){
 }
 
 void lista_conta_p_cliente(){
+
+    organiza_vetor(2);
     int i, j, opcao, check;
     char cli[MAX_CODIGO], busca_cliente[MAX_CODIGO];
 
@@ -1172,7 +1201,6 @@ void lista_conta_p_cliente(){
                 printf("\n---------- Lista de contas vinculadas -------------\n");
                 for(j=0; j<num_contas; j++){
                     if(!strcmp(v_contas[j].cliente, v_clientes[i].codigo)){
-                        printf("\nCliente: %s", v_contas[j].cliente);
                         printf("\nAgencia: %s", v_contas[j].agencia);
                         printf("\nNumero: %s", v_contas[j].numero);
                         printf("\nSaldo: %.2f\n", v_contas[j].saldo);
@@ -1227,7 +1255,6 @@ void saca_conta(){
             i=encontra_valor(1, cliente, 1);
 
             printf("\n------------- Conta encontrada! ---------------");
-            printf("\nCliente: %s", v_contas[j].cliente);
             printf("\nAgencia: %s", v_contas[j].agencia);
             printf("\nNumero: %s", v_contas[j].numero);
             printf("\nSaldo: %.2f\n", v_contas[j].saldo);
@@ -1334,7 +1361,6 @@ void deposita_conta(){
             i=encontra_valor(1, cliente, 1);
 
             printf("\n------------- Conta encontrada! ---------------");
-            printf("\nCliente: %s", v_contas[j].cliente);
             printf("\nAgencia: %s", v_contas[j].agencia);
             printf("\nNumero: %s", v_contas[j].numero);
             printf("\nSaldo: %.2f\n", v_contas[j].saldo);
@@ -1425,7 +1451,6 @@ void transfere_conta(){
             i=encontra_valor(1, cliente, 1);
 
             printf("\n------------- Conta encontrada! ---------------");
-            printf("\nCliente: %s", v_contas[j].cliente);
             printf("\nAgencia: %s", v_contas[j].agencia);
             printf("\nNumero: %s", v_contas[j].numero);
             printf("\nSaldo: %.2f\n", v_contas[j].saldo);
@@ -1452,7 +1477,6 @@ void transfere_conta(){
                     a=encontra_valor(1, cliente, 1);
 
                     printf("\n------------- Conta encontrada! ---------------");
-                    printf("\nCliente: %s", v_contas[b].cliente);
                     printf("\nAgencia: %s", v_contas[b].agencia);
                     printf("\nNumero: %s", v_contas[b].numero);
                     printf("\nSaldo: %.2f\n", v_contas[b].saldo);
@@ -1510,9 +1534,11 @@ void transfere_conta(){
                     }
                 }
                 else{
-                    printf("\nInforme uma descricao para esta transferencia:\n\n");
-                    scanf("%[^\n]%*c", descricao);
-                    fflush(stdin);
+                    
+                    strcpy(descricao, "Transferencia para a conta: ");
+                    strcat(descricao, v_contas[b].agencia);
+                    strcat(descricao, "-");
+                    strcat(descricao, v_contas[b].numero);
 
                     strcpy(conta, v_contas[j].agencia);
                     strcat(conta, v_contas[j].numero);
@@ -1528,6 +1554,11 @@ void transfere_conta(){
                     if(!strcmp(saque.conta, v_transacoes[num_transacoes].conta) && saque.valor==v_transacoes[num_transacoes].valor){
                         v_contas[j].saldo -= valor;
                         num_transacoes++;
+
+                        strcpy(descricao, "Transferencia de conta: ");
+                        strcat(descricao, v_contas[j].agencia);
+                        strcat(descricao, "-");
+                        strcat(descricao, v_contas[j].numero);
 
                         strcpy(conta, v_contas[b].agencia);
                         strcat(conta, v_contas[b].numero);
@@ -1703,7 +1734,6 @@ void extrato_conta(){
             i=encontra_valor(1, cliente, 1);
 
             printf("\n------------- Conta encontrada! ---------------");
-            printf("\nCliente: %s", v_contas[j].cliente);
             printf("\nAgencia: %s", v_contas[j].agencia);
             printf("\nNumero: %s", v_contas[j].numero);
             printf("\nSaldo: %.2f\n", v_contas[j].saldo);
