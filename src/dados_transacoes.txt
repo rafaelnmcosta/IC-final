@@ -73,3 +73,8 @@ CREDITO
 03/11/2021
 04283830
 Deposito para teste de ordem da listagem
+DEBITO
+89.00
+03/11/2021
+12378780
+Teste da funcao que divide as notas

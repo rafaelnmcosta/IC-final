@@ -71,7 +71,6 @@ void menu_cliente();
 void menu_conta();
 
 int encontra_valor(int, char*, int);
-int ordem_alfabetica(char*, char*);
 void organiza_vetor(int);
 void conta_notas(int);
 void calcula_data(int, int*, int*, int*);
@@ -1225,11 +1224,61 @@ void lista_conta_p_cliente(){
     }
 }
 
-/*
 void conta_notas(int valor){
+    
+    int resto=0, cont2=0, cont5=0, cont10=0, cont20=0, cont50=0, cont100=0, cont200=0;
 
+    do{
+        if (valor>=200){
+            valor-=200;
+            cont200++;
+        }
+        else if(valor>=100){
+            valor-=100;
+            cont100++;
+        }
+        else if(valor >= 50){
+            valor-=50;
+            cont50++;
+        }
+        else if(valor>=20){
+            valor-=20;
+            cont20++;
+        }
+        else if(valor>=10){
+            valor -= 10;
+            cont10++;
+        }
+        else if(valor>=5){
+            if(valor%2!=0){
+                valor -= 5;
+                cont5++;
+            }
+            else{
+                valor-=2;
+                cont2++;
+            }
+        }
+        else if(valor>=2){
+            valor-=2;
+            cont2++;
+        }
+        else{
+            valor--;
+            resto++;
+        }
+    } while (valor > 0);
+
+    printf("\nO dinheiro sera entregue em:\n");
+    if(cont200) printf("%d nota(s) de 200\n", cont200);
+    if(cont100) printf("%d nota(s) de 100\n", cont100);
+    if(cont50) printf("%d nota(s) de 50\n", cont50);
+    if(cont20) printf("%d nota(s) de 20\n", cont20);
+    if(cont10) printf("%d nota(s) de 10\n", cont10);
+    if(cont5) printf("%d nota(s) de 5\n", cont5);
+    if(cont2) printf("%d nota(s) de 2\n", cont2);
+    if(resto) printf("e uma moeda de um real\n");
 }
-*/
 
 void saca_conta(){
     int i, j, check;
@@ -1307,7 +1356,7 @@ void saca_conta(){
                         v_contas[j].saldo -= valor;
                         num_transacoes++;
                         printf("\n-------------- Saque realizado! ---------------\n");
-                        //conta_notas((int)valor);
+                        conta_notas((int)valor);
                         return;
                     }
                     else{
